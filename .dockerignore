@@ -1,0 +1,13 @@
+bin/
+obj/
+**/bin/
+**/obj/
+node_modules/
+web/dist/
+web/node_modules/
+.vs/
+.vscode/
+.idea/
+*.user
+*.log
+docs/

@@ -1,0 +1,30 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: bom-postgres
+    environment:
+      POSTGRES_DB: bom
+      POSTGRES_USER: bom
+      POSTGRES_PASSWORD: bompass
+    ports:
+      - "5432:5432"
+    volumes:
+      - bom_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bom -d bom"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Web DB admin (opsional) — buka http://localhost:8080
+  adminer:
+    image: adminer:latest
+    container_name: bom-adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+volumes:
+  bom_pgdata:

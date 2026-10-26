@@ -1,0 +1,26 @@
+# ---- .NET ----
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# ---- Node / Vite ----
+node_modules/
+web/dist/
+web/dist-ssr/
+*.local
+
+# ---- Env / secrets ----
+# .env di web/ berisi konfigurasi non-rahasia (VITE_API_URL) dan boleh di-commit.
+# Jangan commit file rahasia berikut jika suatu saat dibuat:
+appsettings.*.Local.json
+*.env.local
+
+# ---- Editor / OS ----
+.idea/
+.DS_Store
+Thumbs.db
+
+# ---- Logs ----
+*.log
