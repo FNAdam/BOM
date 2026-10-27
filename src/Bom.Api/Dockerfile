@@ -26,6 +26,10 @@ WORKDIR /app
 COPY --from=build /app .
 
 ENV ASPNETCORE_ENVIRONMENT=Production
+# Deklarasi statis supaya platform yang butuh port tetap di build-time (mis. Back4App) tahu
+# ke port mana harus route traffic — harus sama dengan default fallback di ENTRYPOINT di bawah.
+EXPOSE 8080
 # Platform PaaS (Render/Railway/dll) menyuntikkan $PORT saat runtime; Kestrel di-bind ke situ.
-# Default 8080 dipakai kalau $PORT tidak di-set (mis. saat `docker run` manual).
+# Default 8080 dipakai kalau $PORT tidak di-set (mis. saat `docker run` manual, atau platform
+# yang tidak inject $PORT seperti Back4App — harus cocok dengan EXPOSE di atas).
 ENTRYPOINT ["sh", "-c", "ASPNETCORE_URLS=http://0.0.0.0:${PORT:-8080} dotnet Bom.Api.dll"]
