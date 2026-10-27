@@ -661,6 +661,9 @@ label.checkbox input {
 @media (max-width: 720px) {
   .app-shell {
     grid-template-columns: 1fr;
+    /* Tanpa ini, 2 baris grid (topbar + content) ikut "stretch" mengisi sisa min-height:100vh,
+       bikin topbar jadi kotak navy raksasa dengan ruang kosong di bawah tombol/judul. */
+    align-content: start;
   }
   .dashboard-summary {
     grid-template-columns: 1fr;
