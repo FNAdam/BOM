@@ -1227,10 +1227,11 @@ dotnet ef database update --project src/Bom.Infrastructure --startup-project src
         <p>Pakai ini <b>sebagai ganti</b> langkah 3 (Render) kalau Render minta kartu kredit dan Anda tidak punya. Resmi tertulis di halaman pricing mereka: free container tier <b>tidak perlu kartu kredit</b>.</p>
         <ol class="substeps">
           <li>Daftar di <span class="mono">back4app.com</span> (gratis, bisa pakai akun GitHub).</li>
-          <li>Dashboard → tombol <b>New App</b> (pojok kanan-atas) → pilih <b>Containers as a Service</b> (nama tombol persisnya bisa sedikit beda tergantung versi dashboard — cari kata kunci "Container").</li>
-          <li>Hubungkan ke repo GitHub yang sudah di-push tadi → pilih branch <span class="mono">main</span>.</li>
-          <li>Isi <b>Root Directory</b>: <b>biarkan kosong / isi titik</b> <span class="mono">.</span> (folder root repo) — <b>jangan</b> diisi <span class="mono">src/Bom.Api</span>. Back4App cuma punya satu field ini (beda dari Render yang punya field terpisah untuk lokasi Dockerfile vs build context), dan dia otomatis mencari file bernama persis <span class="mono">Dockerfile</span> di folder root repo — makanya project ini sudah disiapkan dengan salinan <span class="mono">Dockerfile</span> di root (isinya sama persis dengan <span class="mono">src/Bom.Api/Dockerfile</span> yang dipakai Render). Kalau Root Directory diisi <span class="mono">src/Bom.Api</span>, Back4App akan error <b>"No Dockerfile in this folder"</b> karena yang ada di situ cuma kode, bukan Dockerfile root.</li>
-          <li>Tambahkan Environment Variables — <b>beda dari Render</b>: Back4App mewajibkan nama variabel <b>huruf besar semua</b> (huruf kapital/angka/underscore saja, tanpa huruf kecil). ASP.NET Core tidak peduli besar-kecil huruf saat membaca environment variable, jadi aman ditulis begini:</li>
+          <li>Dashboard → tombol <b>New App</b> → muncul layar pilihan jenis app: <b>Backend</b> atau <b>Container</b> — klik <b>Container</b> (<i>bukan</i> "Containers as a Service" — label persisnya cuma "Container"; kalau tombolnya tidak persis sama, cari kartu/opsi yang menyebut "Container" atau "Docker", biasanya di sebelah opsi "Backend").</li>
+          <li>Klik <b>Connect with your GitHub</b> (kalau GitHub belum pernah dihubungkan) → tombol <b>Import GitHub Repo</b> → Anda diarahkan ke halaman GitHub → pilih/izinkan repo <span class="mono">BOM</span> yang sudah di-push tadi (install "Back4App Containers" app ke repo itu) → kembali otomatis ke Back4App.</li>
+          <li>Repo akan muncul di daftar (<b>Git Repository List</b>) → klik repo <span class="mono">BOM</span> → pilih branch <span class="mono">main</span>.</li>
+          <li>Di bagian <b>Prepare your initial deployment</b>: isi nama app bebas, pastikan Branch = <span class="mono">main</span>, lalu isi <b>Root Directory</b>: <b>biarkan kosong / isi titik</b> <span class="mono">.</span> (folder root repo) — <b>jangan</b> diisi <span class="mono">src/Bom.Api</span>. Back4App cuma punya satu field ini (beda dari Render yang punya field terpisah untuk lokasi Dockerfile vs build context), dan dia otomatis mencari file bernama persis <span class="mono">Dockerfile</span> di folder root repo — makanya project ini sudah disiapkan dengan salinan <span class="mono">Dockerfile</span> di root (isinya sama persis dengan <span class="mono">src/Bom.Api/Dockerfile</span> yang dipakai Render). Kalau Root Directory diisi <span class="mono">src/Bom.Api</span>, Back4App akan error <b>"No Dockerfile in this folder"</b> karena yang ada di situ cuma kode, bukan Dockerfile root.</li>
+          <li>Masih di layar yang sama, tambahkan Environment Variables — <b>beda dari Render</b>: Back4App mewajibkan nama variabel <b>huruf besar semua</b> (huruf kapital/angka/underscore saja, tanpa huruf kecil). ASP.NET Core tidak peduli besar-kecil huruf saat membaca environment variable, jadi aman ditulis begini:</li>
         </ol>
         <div class="table-scroll">
           <table>
@@ -1241,8 +1242,8 @@ dotnet ef database update --project src/Bom.Infrastructure --startup-project src
             </tbody>
           </table>
         </div>
-        <ol class="substeps" start="6">
-          <li>Klik <b>Deploy</b> → tunggu build selesai → catat URL yang ditampilkan di dashboard app Anda (format domainnya beda-beda, lihat langsung di halaman app setelah deploy sukses). Pakai URL ini untuk langkah 4, menggantikan URL Render.</li>
+        <ol class="substeps" start="7">
+          <li>Klik tombol <b>Create your App !</b> → Anda masuk ke halaman <b>App Overview</b> yang menampilkan log build/deploy secara langsung → tunggu sampai selesai → catat URL yang ditampilkan di halaman app Anda (format domainnya beda-beda, lihat langsung di halaman app setelah deploy sukses). Pakai URL ini untuk langkah 4, menggantikan URL Render.</li>
         </ol>
         <p class="tip">RAM free tier Back4App lebih kecil dari Render (256 MB vs 512 MB) — cukup untuk demo, tapi kalau app sering crash/restart sendiri, itu tandanya kehabisan memori.</p>
       </li>
