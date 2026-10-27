@@ -1,7 +1,10 @@
 // HashRouter (bukan BrowserRouter): GitHub Pages hosting statis murni, tidak bisa rewrite
 // server-side ke index.html untuk path dalam-SPA — refresh di selain "/" akan 404 kalau
 // pakai BrowserRouter. HashRouter (URL berbentuk .../#/items) jalan tanpa konfigurasi server.
+import { useState } from 'react';
 import { HashRouter, NavLink, Navigate, Route, Routes } from 'react-router-dom';
+import { clearSession, getUsername, isAuthenticated } from './api/auth';
+import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ItemsPage } from './pages/ItemsPage';
 import { UomsPage } from './pages/UomsPage';
@@ -57,10 +60,31 @@ const navGroups = [
 ];
 
 function App() {
+  const [authed, setAuthed] = useState(isAuthenticated());
+  const [navOpen, setNavOpen] = useState(false);
+
+  if (!authed) {
+    return <LoginPage onLoggedIn={() => setAuthed(true)} />;
+  }
+
+  function handleLogout() {
+    clearSession();
+    setAuthed(false);
+  }
+
   return (
     <HashRouter>
       <div className="app-shell">
-        <aside className="sidebar">
+        <div className="mobile-topbar">
+          <button className="hamburger-btn" onClick={() => setNavOpen(true)} aria-label="Buka menu">
+            ☰
+          </button>
+          <span className="brand-mark">BOM</span>
+        </div>
+
+        <div className={navOpen ? 'nav-overlay open' : 'nav-overlay'} onClick={() => setNavOpen(false)} />
+
+        <aside className={navOpen ? 'sidebar open' : 'sidebar'}>
           <div className="brand">
             <span className="brand-mark">BOM</span>
             <span className="brand-sub">Bill of Materials</span>
@@ -74,6 +98,7 @@ function App() {
                     key={item.to}
                     to={item.to}
                     end={item.to === '/'}
+                    onClick={() => setNavOpen(false)}
                     className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
                   >
                     {item.label}
@@ -82,6 +107,11 @@ function App() {
               </div>
             ))}
           </nav>
+          <div className="sidebar-footer">
+            <button className="btn" onClick={handleLogout}>
+              Keluar{getUsername() ? ` (${getUsername()})` : ''}
+            </button>
+          </div>
         </aside>
 
         <main className="content">

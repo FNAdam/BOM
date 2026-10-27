@@ -1,5 +1,6 @@
 // HTTP client tipis untuk memanggil BOM API.
 // Base URL diambil dari VITE_API_URL, fallback ke localhost:5099.
+import { clearSession, getToken } from './auth';
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5099';
 
@@ -34,11 +35,24 @@ async function extractErrorMessage(res: Response): Promise<string> {
 }
 
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
+  const token = getToken();
+  const headers: Record<string, string> = {};
+  if (body !== undefined) headers['Content-Type'] = 'application/json';
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
   const res = await fetch(`${BASE_URL}${path}`, {
     method,
-    headers: body !== undefined ? { 'Content-Type': 'application/json' } : undefined,
+    headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
+
+  if (res.status === 401) {
+    clearSession();
+    // Full reload (bukan navigate React Router) supaya seluruh state ikut di-reset bersih.
+    window.location.hash = '#/login';
+    window.location.reload();
+    throw new Error('Sesi login berakhir, silakan login lagi.');
+  }
 
   if (!res.ok) {
     throw new Error(await extractErrorMessage(res));

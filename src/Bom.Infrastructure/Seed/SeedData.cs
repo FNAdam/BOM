@@ -39,5 +39,17 @@ public static class SeedData
                 MinMarginPercent = 0m,
                 RoundingRule = RoundingRule.None
             });
+
+        // Akun admin default. Password: "ChangeMe123!" (hash di bawah dihasilkan sekali lewat
+        // PasswordHasher<object>, bukan secret runtime — ganti via endpoint ganti password
+        // setelah login pertama kali).
+        modelBuilder.Entity<AppUser>().HasData(
+            new AppUser
+            {
+                Id = 1,
+                Username = "admin",
+                PasswordHash = "AQAAAAIAAYagAAAAEPNxzwDIXdQyUWljdwwrKOUZEPXwJVzxXFv2KgwPOT0XSk6LN6RWN8cZ9leKubX9qw==",
+                CreatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            });
     }
 }

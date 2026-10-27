@@ -1,10 +1,15 @@
+using System.Text;
 using System.Text.Json.Serialization;
 using Bom.Application.Services;
 using Bom.Application.Validators;
 using Bom.Infrastructure.Persistence;
 using Bom.Infrastructure.Services;
 using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,8 +31,33 @@ builder.Services.AddScoped<IMrpService, MrpService>();
 builder.Services.AddScoped<IProductionService, ProductionService>();
 builder.Services.AddScoped<IPricingService, PricingService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
-builder.Services.AddControllers()
+// Login JWT bearer: semua endpoint butuh token valid secara default (global AuthorizeFilter di
+// bawah), kecuali yang ditandai [AllowAnonymous] (POST /api/auth/login).
+var jwtKey = builder.Configuration["Jwt:Key"]
+    ?? "dev-only-insecure-signing-key-change-me-in-production-32chars+";
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromMinutes(1),
+        };
+    });
+builder.Services.AddAuthorization();
+
+builder.Services.AddControllers(options =>
+    {
+        // Semua controller butuh login kecuali ditandai [AllowAnonymous] eksplisit.
+        options.Filters.Add(new AuthorizeFilter());
+    })
     .AddJsonOptions(options =>
     {
         // Enum diserialisasi sebagai string, bukan angka.
@@ -71,6 +101,9 @@ if (app.Environment.IsDevelopment())
 
 // HTTPS redirection dimatikan untuk pengembangan (HTTP only) agar mulus dengan React dev server.
 app.UseCors(CorsPolicy);
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 

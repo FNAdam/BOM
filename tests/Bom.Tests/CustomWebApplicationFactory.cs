@@ -1,4 +1,5 @@
 using Bom.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -33,6 +34,11 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
             services.AddDbContext<BomDbContext>(options =>
                 options.UseInMemoryDatabase(DatabaseName));
+
+            // Login diwajibkan di semua controller (lihat Program.cs) - ganti ke skema palsu yang
+            // selalu sukses supaya test tidak perlu login/kirim JWT asli satu per satu.
+            services.AddAuthentication(TestAuthHandler.SchemeName)
+                .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.SchemeName, _ => { });
         });
 
         // Redam noise log provider InMemory saat test (mis. peringatan transaksi diabaikan).
