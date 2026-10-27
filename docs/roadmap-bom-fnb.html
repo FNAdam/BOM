@@ -217,6 +217,15 @@
   .note-line{font-size:13px; color:var(--muted); margin-top:14px; padding-left:14px;
     border-left:2px solid var(--amber);}
 
+  .pitfall{font-size:13px; color:var(--ink); margin:0; padding:10px 14px;
+    border-left:2px solid var(--crit); background:color-mix(in srgb, var(--crit) 7%, transparent);
+    border-radius:0 8px 8px 0;}
+  .pitfall b{color:var(--crit);}
+  .pitfalls{display:flex; flex-direction:column; gap:9px; margin-top:14px;}
+  .click{font-family:var(--mono); font-size:12px; background:var(--surface-2); border:1px solid var(--line);
+    border-radius:5px; padding:1px 6px; white-space:nowrap;}
+  .screen-note{font-size:12.5px; color:var(--faint); margin:4px 0 0; font-style:italic;}
+
   /* interactive calculator */
   .calc{margin-top:16px;}
   .calc-lead{font-size:13.5px; color:var(--muted); margin-top:8px; max-width:70ch;}
@@ -284,13 +293,25 @@
   .prereq .chip{background:var(--surface); }
   .run-steps{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:13px;}
   .run-steps > li{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:15px 17px;}
-  .rs-head{display:flex; align-items:center; gap:11px; margin-bottom:9px;}
+  .rs-head{display:flex; align-items:center; flex-wrap:wrap; gap:7px 11px; margin-bottom:9px;}
   .rs-no{width:26px; height:26px; border-radius:50%; background:var(--accent); color:#fff;
     font-family:var(--mono); font-weight:600; font-size:13px; display:flex; align-items:center; justify-content:center; flex:0 0 auto;}
+  .rs-no.alt{width:30px; border-radius:8px; font-size:11px; background:var(--surface-2); color:var(--muted); border:1px solid var(--line-strong);}
   .rs-head h3{font-size:16px; font-family:var(--sans); font-weight:600;}
   .run-steps p{font-size:13px; color:var(--muted); margin:0 0 10px;}
   pre.cmd{margin:0; background:#15211D; color:#E7F0EC; font-family:var(--mono); font-size:12.5px;
     line-height:1.75; padding:11px 14px; border-radius:8px; overflow-x:auto; white-space:pre; border:1px solid rgba(255,255,255,.06);}
+  mark.hl-host, mark.hl-user, mark.hl-pass{border-radius:3px; padding:1px 4px; font-weight:700; font-family:var(--mono);}
+  mark.hl-host{background:color-mix(in srgb, var(--accent) 20%, transparent); color:var(--accent-ink);}
+  mark.hl-user{background:color-mix(in srgb, var(--amber) 20%, transparent); color:var(--amber);}
+  mark.hl-pass{background:color-mix(in srgb, var(--crit) 18%, transparent); color:var(--crit);}
+  pre.cmd mark.hl-host{background:rgba(52,195,156,.22); color:#8FE6CF;}
+  pre.cmd mark.hl-user{background:rgba(224,163,74,.25); color:#F0C27E;}
+  pre.cmd mark.hl-pass{background:rgba(218,107,92,.25); color:#F0998A;}
+  .hl-key{font-weight:700; padding:1px 4px; border-radius:3px;}
+  .hl-key.hl-host{background:color-mix(in srgb, var(--accent) 20%, transparent); color:var(--accent-ink);}
+  .hl-key.hl-user{background:color-mix(in srgb, var(--amber) 20%, transparent); color:var(--amber);}
+  .hl-key.hl-pass{background:color-mix(in srgb, var(--crit) 18%, transparent); color:var(--crit);}
   .run-meta{background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:18px; align-self:start;}
   .meta-list{list-style:none; margin:10px 0 0; padding:0;}
   .meta-list li{display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid var(--line); font-size:13px;}
@@ -1098,62 +1119,191 @@ flowchart LR
 
     <p class="note-line">File konfigurasi deploy (Dockerfile backend, workflow GitHub Actions, CORS berbasis config, HashRouter, base path Vite dinamis) <b>sudah disiapkan di kode</b> — langkah di bawah murni setup akun &amp; klik, tidak perlu ubah kode lagi.</p>
 
+    <div class="kicker" style="margin-top:22px;">Prasyarat — 3 akun gratis</div>
+    <div class="ent-grid">
+      <div class="ent"><h4>1. GitHub</h4><ul><li>github.com → Sign up</li><li>tempat simpan kode</li></ul></div>
+      <div class="ent"><h4>2. Supabase</h4><ul><li>supabase.com → Sign up</li><li>bisa pakai akun GitHub</li></ul></div>
+      <div class="ent"><h4>3. Render</h4><ul><li>render.com → Sign up</li><li>bisa pakai akun GitHub</li></ul></div>
+    </div>
+    <p class="tip">Saran: daftar Supabase &amp; Render pakai tombol <b>"Continue with GitHub"</b> (bukan email/password) — lebih cepat &amp; otomatis ter-link ke akun GitHub yang sama.</p>
+
     <ol class="run-steps" style="margin-top:20px;">
       <li>
-        <div class="rs-head"><span class="rs-no">1</span><h3>Push project ke GitHub</h3><span class="loc">di: PowerShell, folder root</span></div>
+        <div class="rs-head"><span class="rs-no">1</span><h3>Push project ke GitHub</h3><span class="ph-tag done">✓ Sudah: FNAdam/BOM</span><span class="loc">di: PowerShell, folder root project</span></div>
         <p>Prasyarat langkah 3 &amp; 4 — keduanya deploy dari repo GitHub yang sama.</p>
+        <ol class="substeps">
+          <li>Buka <span class="mono">github.com</span> → pojok kanan-atas klik ikon <span class="click">+</span> di sebelah foto profil → <b>New repository</b>.</li>
+          <li>Isi <b>Repository name</b> (mis. <span class="mono">BOM</span>) → pilih <b>Public</b> atau <b>Private</b> (bebas) → <u>jangan centang</u> "Add a README file" / ".gitignore" / "license" (biar tidak bentrok saat push pertama) → klik <b>Create repository</b>.</li>
+          <li>Halaman berikutnya menampilkan URL repo, mis. <span class="mono">https://github.com/&lt;username&gt;/&lt;repo&gt;.git</span> — salin URL itu, lalu jalankan di PowerShell (folder root project ini):</li>
+        </ol>
         <pre class="cmd">git init
 git add .
 git commit -m "Initial commit"
 git branch -M main
 git remote add origin https://github.com/&lt;username&gt;/&lt;repo&gt;.git
 git push -u origin main</pre>
-        <p class="tip">Buat repo kosong dulu di github.com (<b>New repository</b>) — jangan centang "Add README", supaya tidak bentrok saat push pertama.</p>
+        <p class="screen-note">Artinya tiap baris: <span class="mono">init</span>=mulai git di folder ini · <span class="mono">add .</span>=tandai semua file utk disimpan · <span class="mono">commit</span>=simpan sebagai 1 titik riwayat · <span class="mono">branch -M main</span>=nama branch utama · <span class="mono">remote add</span>=sambungkan ke repo GitHub · <span class="mono">push</span>=upload.</p>
+        <p class="tip">Kalau diminta login saat <span class="mono">push</span>, biasanya muncul jendela browser — login dengan akun GitHub yang sama dengan pemilik repo. Berhasil kalau refresh halaman repo di github.com menampilkan semua folder (<span class="mono">src</span>, <span class="mono">web</span>, dst).</p>
       </li>
 
       <li>
         <div class="rs-head"><span class="rs-no">2</span><h3>Buat database di Supabase</h3><span class="loc">di: supabase.com</span></div>
         <ol class="substeps">
-          <li>Daftar/login di <span class="mono">supabase.com</span> → <b>New Project</b> → beri nama &amp; password database → tunggu provisioning (±2 menit).</li>
-          <li><b>Project Settings → Database → Connection string</b>, pilih tab <b>Session pooler</b> (lebih stabil utk app yang nyala terus, dibanding Direct connection), salin format URI.</li>
-          <li>Ubah ke format Npgsql (keyword=value) + tambah <span class="mono">SSL Mode=Require</span>:</li>
+          <li>Login di <span class="mono">supabase.com</span> → klik <b>New Project</b>.</li>
+          <li>Kalau diminta pilih/buat <b>Organization</b> dulu: bikin satu (nama bebas, mis. nama Anda), plan <b>Free</b>.</li>
+          <li>Isi form project: <b>Name</b> (bebas, mis. <span class="mono">bom-fnb</span>) · <b>Database Password</b> — klik <b>Generate a password</b> lalu <u>copy &amp; simpan di notepad</u> (dipakai lagi di langkah berikutnya, Supabase tidak menampilkannya lagi setelah ini) · <b>Region</b> pilih yang terdekat (mis. Singapore) · Plan: <b>Free</b> → klik <b>Create new project</b>.</li>
+          <li>Tunggu layar "Setting up project…" (±2 menit) sampai masuk ke dashboard project.</li>
+          <li>Di dashboard, cari tombol <b>Connect</b> — letaknya di bar paling atas halaman, sejajar dengan nama project (ikon mirip colokan/plug, bukan menu Settings). Klik tombol itu.</li>
+          <li>Panel/dialog terbuka. Cari bagian pemilihan mode koneksi (dropdown atau tab bertuliskan "Direct connection / Transaction pooler / Session pooler") → pilih <b>Session pooler</b>.</li>
+          <li>Di bawahnya muncul 1 baris panjang bertuliskan <b>URI</b> — klik ikon copy di sampingnya untuk menyalin semuanya sekaligus (tidak perlu dibaca/diketik ulang manual).</li>
         </ol>
-        <pre class="cmd">Host=aws-0-&lt;region&gt;.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.&lt;project-ref&gt;;Password=&lt;password-db&gt;;SSL Mode=Require;Trust Server Certificate=true</pre>
-        <p>Apply skema (migration) ke Supabase dari komputer Anda — cukup sekali:</p>
+        <p>URI yang tersalin itu terlihat rumit, tapi sebenarnya cuma <b>3 potongan info</b> yang digabung jadi 1 baris. Contoh konkret (angka/huruf punya Anda pasti beda — ini cuma ilustrasi):</p>
+        <pre class="cmd">postgresql://<mark class="hl-user">postgres.abcdxyzklmn</mark>:<mark class="hl-pass">[YOUR-PASSWORD]</mark>@<mark class="hl-host">aws-0-ap-southeast-1.pooler.supabase.com</mark>:5432/postgres</pre>
+        <p>Tabel ini artinya: lihat warnanya di URI Anda (baris di atas) → ambil tulisannya persis seperti kolom tengah → tempel jadi nilai di kolom kanan (ini nama field di template Npgsql, bukan di Supabase):</p>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Warna</th><th>Yang Anda ambil dari URI Anda</th><th>Jadi nilai field</th></tr></thead>
+            <tbody>
+              <tr><td><mark class="hl-host">hijau</mark></td><td>semua tulisan antara <span class="mono">@</span> dan <span class="mono">:5432</span> — salin utuh, jangan dipotong</td><td class="mono">Host=...</td></tr>
+              <tr><td><mark class="hl-user">oranye</mark></td><td>semua tulisan antara <span class="mono">://</span> dan tanda <span class="mono">:</span> sebelum password (selalu diawali <span class="mono">postgres.</span>) — salin utuh</td><td class="mono">Username=...</td></tr>
+              <tr><td><mark class="hl-pass">merah</mark></td><td><b>bukan disalin</b> — tulisan <span class="mono">[YOUR-PASSWORD]</span> diganti dengan password database yang Anda simpan di langkah c tadi</td><td class="mono">Password=...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Hasil jadinya — 3 warna yang sama, sudah dipindah ke template lengkap (bagian putih/tak berwarna — <span class="mono">Port</span>, <span class="mono">Database</span>, <span class="mono">SSL Mode</span> — biarkan persis seperti ini, jangan diubah):</p>
+        <pre class="cmd">Host=<mark class="hl-host">aws-0-ap-southeast-1.pooler.supabase.com</mark>;Port=5432;Database=postgres;Username=<mark class="hl-user">postgres.abcdxyzklmn</mark>;Password=<mark class="hl-pass">password-anda-di-sini</mark>;SSL Mode=Require;Trust Server Certificate=true</pre>
+        <p class="tip">Warna di sini cuma penanda visual biar gampang mencocokkan — tampilan asli di URI Supabase / terminal Anda tidak berwarna seperti ini.</p>
+        <p>Simpan hasil di atas (connection string lengkap, sudah diganti) — dipakai 2 kali: sekali untuk apply migration di bawah ini, sekali lagi untuk Environment Variable di Render (langkah 3). Apply skema (migration) ke Supabase dari komputer Anda, cukup sekali:</p>
         <pre class="cmd">$env:ConnectionStrings__Default = "Host=aws-0-....;SSL Mode=Require;..."
 dotnet ef database update --project src/Bom.Infrastructure --startup-project src/Bom.Api</pre>
+        <p class="tip">Berhasil kalau output terakhir <span class="mono">Done.</span> tanpa error. Cek: Supabase dashboard → menu kiri <b>Table Editor</b> → harus muncul daftar tabel (items, boms, uoms, dst).</p>
       </li>
 
       <li>
         <div class="rs-head"><span class="rs-no">3</span><h3>Deploy backend ke Render</h3><span class="loc">di: render.com</span></div>
         <ol class="substeps">
-          <li>Daftar/login di <span class="mono">render.com</span> (bisa pakai akun GitHub) → <b>New → Web Service</b> → pilih repo yang di-push tadi.</li>
-          <li>Environment: <b>Docker</b>; Dockerfile Path: <span class="mono">src/Bom.Api/Dockerfile</span>; Docker Build Context: <span class="mono">.</span> (root repo — wajib, karena project referensi folder lain).</li>
-          <li>Tambah Environment Variables:</li>
+          <li>Login di <span class="mono">render.com</span> (saran: tombol <b>"Continue with GitHub"</b>) → dashboard → klik tombol <b>New</b> (ikon <span class="click">+</span>, pojok kanan-atas) → pilih <b>Web Service</b>.</li>
+          <li>Halaman berikutnya minta sumber kode: pilih <b>Build and deploy from a Git repository</b> → klik <b>Next</b>.</li>
+          <li>Muncul daftar repo GitHub Anda → cari repo yang di-push tadi → klik <b>Connect</b> di sebelahnya. Kalau repo tidak muncul di daftar, klik <b>Configure account</b> (akan membuka GitHub) → di sana beri izin Render mengakses repo tsb → kembali ke tab Render, repo akan muncul.</li>
+          <li>Form konfigurasi service terbuka. Isi bagian atas:</li>
+        </ol>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Field</th><th>Isi</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">Name</td><td>bebas, mis. <span class="mono">bom-api</span> — jadi bagian URL: <span class="mono">https://bom-api.onrender.com</span></td></tr>
+              <tr><td class="mono">Region</td><td>bebas, pilih yang terdekat</td></tr>
+              <tr><td class="mono">Branch</td><td><span class="mono">main</span></td></tr>
+              <tr><td class="mono">Root Directory</td><td><b>biarkan kosong</b> — <u>jangan diisi apa pun</u></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="pitfall"><b>Kenapa Root Directory harus kosong:</b> Dockerfile kita (<span class="mono">src/Bom.Api/Dockerfile</span>) meng-copy file dari <span class="mono">src/</span>, <span class="mono">tests/</span>, dan file <span class="mono">.sln</span> di folder paling atas repo. Kalau Root Directory diisi (mis. <span class="mono">src/Bom.Api</span>), Render hanya akan melihat isi folder itu saja dan build akan gagal "file not found".</p>
+        <ol class="substeps" start="5">
+          <li>Cari dropdown <b>Language</b> (kadang namanya <b>Runtime</b>) → ubah dari pilihan default (Node/Python/dst) menjadi <b>Docker</b>. Pilihan form di bawahnya akan berubah menyesuaikan.</li>
+          <li>Sesudah <b>Language=Docker</b> dipilih, cari field <b>Dockerfile Path</b> (langsung terlihat, atau di dalam bagian yang bisa di-expand bertuliskan <b>Advanced</b>) → isi: <span class="mono">src/Bom.Api/Dockerfile</span>.</li>
+          <li>Set <b>Instance Type</b>: <b>Free</b>.</li>
+        </ol>
+        <p class="tip">Kalau ada field tambahan soal "Docker Build Context" / "Context Directory" (tidak semua tampilan Render menampilkannya), isi dengan <span class="mono">.</span> (titik, artinya folder root repo) — ini harus sama dengan Root Directory, yaitu <b>bukan</b> folder <span class="mono">src/Bom.Api</span>. Kalau field itu tidak ada sama sekali, tidak masalah — defaultnya memang folder root, sudah sesuai.</p>
+        <ol class="substeps" start="8">
+          <li>Scroll ke bagian <b>Environment Variables</b> → klik <b>Add Environment Variable</b> 2× dan isi:</li>
         </ol>
         <div class="table-scroll">
           <table>
             <thead><tr><th>Key</th><th>Value</th></tr></thead>
             <tbody>
-              <tr><td class="mono">ConnectionStrings__Default</td><td class="mono">(connection string Supabase dari langkah 2)</td></tr>
+              <tr><td class="mono">ConnectionStrings__Default</td><td class="mono">(connection string Supabase lengkap dari langkah 2)</td></tr>
               <tr><td class="mono">Cors__AllowedOrigins__0</td><td class="mono">https://&lt;username&gt;.github.io</td></tr>
             </tbody>
           </table>
         </div>
-        <p>Klik <b>Create Web Service</b> → tunggu build (±3-5 menit) → catat URL-nya, mis. <span class="mono">https://bom-api-xxxx.onrender.com</span>.</p>
-        <p class="tip">Tier gratis Render "tidur" setelah 15 menit tanpa trafik — request pertama setelahnya lambat (±30-60 detik) sampai container bangun lagi. Normal, bukan error.</p>
+        <p>Scroll ke bawah → klik tombol <b>Create Web Service</b>. Halaman log build akan terbuka otomatis (tulisan hijau/putih berjalan) → tunggu ±3-5 menit sampai status berubah jadi <span class="mono">Live</span> (lingkaran hijau, biasanya pojok kiri-atas dekat nama service).</p>
+        <p>Salin URL service-nya — tampil di bagian atas halaman, tepat di bawah nama service, formatnya <span class="mono">https://bom-api-xxxx.onrender.com</span>. Simpan URL ini untuk langkah 4.</p>
+        <p class="tip">Cek backend hidup: buka <span class="mono">&lt;url-render&gt;/swagger</span> di browser → kalau muncul halaman Swagger UI, backend sudah jalan. Tier gratis "tidur" setelah 15 menit tanpa trafik — request pertama setelahnya lambat ±30-60 detik sampai container bangun lagi. Itu normal, bukan error.</p>
       </li>
 
       <li>
-        <div class="rs-head"><span class="rs-no">4</span><h3>Deploy frontend ke GitHub Pages</h3><span class="loc">di: GitHub (web)</span></div>
+        <div class="rs-head"><span class="rs-no alt">3B</span><h3>Plan B — Back4App Containers</h3><span class="ph-tag opt">Alternatif langkah 3</span><span class="loc">di: back4app.com</span></div>
+        <p>Pakai ini <b>sebagai ganti</b> langkah 3 (Render) kalau Render minta kartu kredit dan Anda tidak punya. Resmi tertulis di halaman pricing mereka: free container tier <b>tidak perlu kartu kredit</b>.</p>
         <ol class="substeps">
-          <li>Repo GitHub → <b>Settings → Pages → Source</b>, pilih <b>GitHub Actions</b>.</li>
-          <li><b>Settings → Secrets and variables → Actions → New repository secret</b>: nama <span class="mono">VITE_API_URL</span>, isi URL Render dari langkah 3.</li>
-          <li>Push ke branch <span class="mono">main</span> (atau tab <b>Actions → Deploy frontend ke GitHub Pages → Run workflow</b>) — workflow <span class="mono">.github/workflows/deploy-pages.yml</span> otomatis build &amp; publish.</li>
+          <li>Daftar di <span class="mono">back4app.com</span> (gratis, bisa pakai akun GitHub).</li>
+          <li>Dashboard → tombol <b>New App</b> (pojok kanan-atas) → pilih <b>Containers as a Service</b> (nama tombol persisnya bisa sedikit beda tergantung versi dashboard — cari kata kunci "Container").</li>
+          <li>Hubungkan ke repo GitHub yang sudah di-push tadi → pilih branch <span class="mono">main</span>.</li>
+          <li>Isi <b>Root Directory</b>: <b>biarkan kosong / isi titik</b> <span class="mono">.</span> (folder root repo) — <b>jangan</b> diisi <span class="mono">src/Bom.Api</span>. Back4App cuma punya satu field ini (beda dari Render yang punya field terpisah untuk lokasi Dockerfile vs build context), dan dia otomatis mencari file bernama persis <span class="mono">Dockerfile</span> di folder root repo — makanya project ini sudah disiapkan dengan salinan <span class="mono">Dockerfile</span> di root (isinya sama persis dengan <span class="mono">src/Bom.Api/Dockerfile</span> yang dipakai Render). Kalau Root Directory diisi <span class="mono">src/Bom.Api</span>, Back4App akan error <b>"No Dockerfile in this folder"</b> karena yang ada di situ cuma kode, bukan Dockerfile root.</li>
+          <li>Tambahkan Environment Variables — <b>beda dari Render</b>: Back4App mewajibkan nama variabel <b>huruf besar semua</b> (huruf kapital/angka/underscore saja, tanpa huruf kecil). ASP.NET Core tidak peduli besar-kecil huruf saat membaca environment variable, jadi aman ditulis begini:</li>
         </ol>
-        <p>Selesai — aplikasi hidup di <span class="mono">https://&lt;username&gt;.github.io/&lt;repo&gt;/</span>.</p>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Key (huruf besar semua)</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">CONNECTIONSTRINGS__DEFAULT</td><td class="mono">(connection string Supabase lengkap dari langkah 2)</td></tr>
+              <tr><td class="mono">CORS__ALLOWEDORIGINS__0</td><td class="mono">https://&lt;username&gt;.github.io</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ol class="substeps" start="6">
+          <li>Klik <b>Deploy</b> → tunggu build selesai → catat URL yang ditampilkan di dashboard app Anda (format domainnya beda-beda, lihat langsung di halaman app setelah deploy sukses). Pakai URL ini untuk langkah 4, menggantikan URL Render.</li>
+        </ol>
+        <p class="tip">RAM free tier Back4App lebih kecil dari Render (256 MB vs 512 MB) — cukup untuk demo, tapi kalau app sering crash/restart sendiri, itu tandanya kehabisan memori.</p>
+      </li>
+
+      <li>
+        <div class="rs-head"><span class="rs-no alt">3C</span><h3>Plan B — Self-host + Cloudflare Tunnel</h3><span class="ph-tag opt">Alternatif langkah 3</span><span class="loc">di: PowerShell, komputer Anda</span></div>
+        <p>Opsi paling pasti <b>tanpa kartu kredit sama sekali</b> (tanpa akun cloud baru pun) — backend tetap jalan di komputer Anda sendiri, lalu dibukakan ke internet lewat Cloudflare. Trade-off: komputer Anda harus tetap menyala &amp; PowerShell tidak ditutup selama ingin diakses dari luar.</p>
+        <ol class="substeps">
+          <li>Install cloudflared sekali saja:</li>
+        </ol>
+        <pre class="cmd">winget install Cloudflare.cloudflared</pre>
+        <ol class="substeps" start="2">
+          <li>Jalankan backend lokal, tapi arahkan ke database <b>Supabase</b> (bukan Postgres lokal) supaya datanya sama dengan yang dipakai GitHub Pages nanti — di PowerShell, folder root project:</li>
+        </ol>
+        <pre class="cmd">$env:ConnectionStrings__Default = "Host=aws-0-ap-northeast-1.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.blfmfikusvlszhqtmkce;Password=PASSWORD_ANDA;SSL Mode=Require;Trust Server Certificate=true"
+$env:Cors__AllowedOrigins__0 = "https://fnadam.github.io"
+dotnet run --project src/Bom.Api</pre>
+        <p class="screen-note">Biarkan jendela PowerShell ini tetap terbuka &amp; jalan. Catat juga port yang dipakai (biasanya muncul di log, mis. <span class="mono">http://localhost:5099</span>).</p>
+        <ol class="substeps" start="3">
+          <li>Buka jendela PowerShell <b>baru</b> (yang lama jangan ditutup) → jalankan:</li>
+        </ol>
+        <pre class="cmd">cloudflared tunnel --url http://localhost:5099</pre>
+        <p>Akan muncul baris seperti <span class="mono">https://kata-acak-1234.trycloudflare.com</span> — itu URL publik backend Anda. Berlaku selama jendela PowerShell ini tetap terbuka (tidak perlu login/daftar akun Cloudflare sama sekali untuk cara ini). Pakai URL ini untuk langkah 4, menggantikan URL Render.</p>
+        <p class="pitfall"><b>URL berubah tiap kali tunnel di-restart</b> (tutup lalu buka ulang jendela ke-2) — kalau itu terjadi, Anda harus update ulang secret <span class="mono">VITE_API_URL</span> di langkah 4 dan jalankan ulang workflow-nya. Untuk pemakaian lebih dari sekadar demo sekali-dua-kali, Plan B Back4App (3B) lebih praktis karena URL-nya tetap.</p>
+      </li>
+
+      <li>
+        <div class="rs-head"><span class="rs-no">4</span><h3>Deploy frontend ke GitHub Pages</h3><span class="loc">di: github.com (repo Anda)</span></div>
+        <ol class="substeps">
+          <li>Buka repo di github.com → tab <b>Settings</b> (ikon gerigi, di baris menu atas repo — <span class="mono">Code / Issues / Pull requests / ... / Settings</span>).</li>
+          <li>Menu kiri → scroll ke <b>Pages</b> (bagian "Code and automation"). Di bagian <b>Build and deployment → Source</b>, ubah dropdown dari "Deploy from a branch" menjadi <b>GitHub Actions</b>. (Tidak perlu klik Save — otomatis tersimpan.)</li>
+          <li>Masih di menu kiri Settings → <b>Secrets and variables</b> → <b>Actions</b> → pastikan tab <b>Secrets</b> aktif → klik tombol hijau <b>New repository secret</b>.</li>
+          <li>Isi <b>Name</b>: <span class="mono">VITE_API_URL</span> (persis, huruf besar semua) · <b>Secret</b>: tempel URL backend Anda — dari langkah 3 (Render), <b>atau</b> dari Plan B 3B/3C kalau itu yang dipakai (tanpa tanda <span class="mono">/</span> di akhir) → klik <b>Add secret</b>.</li>
+          <li>Jalankan workflow-nya: tab <b>Actions</b> (baris menu atas repo) → menu kiri klik <b>Deploy frontend ke GitHub Pages</b> → tombol <b>Run workflow</b> (kanan-atas) → pilih branch <span class="mono">main</span> → klik tombol hijau <b>Run workflow</b>.</li>
+          <li>Tunggu ±1 menit, refresh halaman — baris workflow akan berubah jadi ✓ hijau. Kalau ✗ merah, klik baris itu untuk lihat log error.</li>
+        </ol>
+        <p>Kembali ke <b>Settings → Pages</b> (langkah b) — sekarang ada kotak hijau bertuliskan <b>"Your site is live at https://&lt;username&gt;.github.io/&lt;repo&gt;/"</b>. Klik link itu untuk membuka aplikasi.</p>
+      </li>
+
+      <li>
+        <div class="rs-head"><span class="rs-no">5</span><h3>Verifikasi akhir</h3><span class="loc">di: browser</span></div>
+        <ol class="substeps">
+          <li>Buka URL GitHub Pages dari langkah 4 → dashboard aplikasi harus muncul (bukan halaman kosong/putih).</li>
+          <li>Coba buka menu <b>Items</b> → <b>Tambah Item</b> → isi &amp; simpan. Kalau berhasil tersimpan, berarti frontend ↔ backend ↔ database sudah tersambung penuh.</li>
+          <li>Kalau error, tekan <span class="click">F12</span> → tab <b>Console</b> → baca pesan error (lihat tabel troubleshooting di bawah).</li>
+        </ol>
       </li>
     </ol>
+
+    <div class="kicker" style="margin-top:26px;">Troubleshooting — error yang paling sering muncul</div>
+    <div class="pitfalls">
+      <p class="pitfall"><b>"Failed to fetch" / CORS error di Console (F12)</b> — nilai <span class="mono">Cors__AllowedOrigins__0</span> di Render tidak persis sama dengan URL GitHub Pages (perhatikan <span class="mono">https://</span>, tanpa garis miring <span class="mono">/</span> di akhir, tanpa <span class="mono">/&lt;repo&gt;</span>). Perbaiki di Render → tab <b>Environment</b> → edit value → <b>Save Changes</b> (otomatis redeploy).</p>
+      <p class="pitfall"><b>Halaman GitHub Pages putih kosong</b> — biasanya workflow belum selesai jalan, atau secret <span class="mono">VITE_API_URL</span> ditambahkan <i>setelah</i> workflow terakhir jalan. Jalankan ulang: tab <b>Actions</b> → workflow → <b>Run workflow</b>.</p>
+      <p class="pitfall"><b>Render build gagal, error "file not found" / "no such file or directory"</b> — hampir selalu karena <span class="mono">Root Directory</span> terisi (harus kosong) atau <span class="mono">Dockerfile Path</span> salah ketik. Perbaiki di service → <b>Settings → Build &amp; Deploy</b> → edit field tsb → <b>Save Changes</b> (akan redeploy otomatis). Lihat tabel field &amp; alasannya di langkah 3.</p>
+      <p class="pitfall"><b>Data gagal simpan, error soal tabel/"relation does not exist"</b> — migration belum di-apply ke Supabase. Ulangi perintah <span class="mono">dotnet ef database update</span> di langkah 2 dengan connection string Supabase yang benar.</p>
+      <p class="pitfall"><b>Render sangat lambat saat pertama dibuka</b> — bukan error, tier gratis Render tidur setelah 15 menit idle dan butuh ±30-60 detik untuk bangun lagi.</p>
+      <p class="pitfall"><b>(Plan B 3C) Tiba-tiba tidak bisa diakses dari GitHub Pages</b> — tunnel Cloudflare mati karena jendela PowerShell-nya tertutup, komputer sleep/restart, atau koneksi internet putus. Buka lagi kedua jendela PowerShell (backend + <span class="mono">cloudflared</span>), URL baru akan terbit → update lagi secret <span class="mono">VITE_API_URL</span> di langkah 4.</p>
+      <p class="pitfall"><b>(Plan B 3B) Error "No Dockerfile in this folder"</b> — Root Directory yang diisi tidak punya file bernama persis <span class="mono">Dockerfile</span> di dalamnya (mis. diisi <span class="mono">src/Bom.Api</span>, yang isinya kode saja). Perbaiki: kosongkan Root Directory (atau isi <span class="mono">.</span>) supaya Back4App memakai <span class="mono">Dockerfile</span> di folder root repo yang sudah disiapkan untuk ini.</p>
+      <p class="pitfall"><b>(Plan B 3B) Back4App container sering restart sendiri</b> — kemungkinan kehabisan RAM (jatah 256 MB). Cek tab Logs di dashboard Back4App untuk pesan "out of memory"; kalau iya, pertimbangkan Plan B 3C atau tetap coba Render dulu.</p>
+      <p class="pitfall"><b>(Plan B 3B) Error "Substitution variables must begin with an underscore or uppercase letter..."</b> saat isi Environment Variable — nama variabelnya mengandung huruf kecil (Back4App mewajibkan huruf besar semua). Tulis <span class="mono">CONNECTIONSTRINGS__DEFAULT</span> dan <span class="mono">CORS__ALLOWEDORIGINS__0</span> (semua huruf besar, garis bawah ganda tetap) — ASP.NET Core tetap baca ini dengan benar karena case-insensitive.</p>
+    </div>
 
     <div class="kicker" style="margin-top:26px;">Yang sudah disiapkan di kode (tidak perlu disentuh lagi)</div>
     <div class="ent-grid">
@@ -1162,7 +1312,7 @@ dotnet ef database update --project src/Bom.Infrastructure --startup-project src
       <div class="ent"><h4>CI/CD</h4><ul><li>.github/workflows/deploy-pages.yml</li></ul></div>
     </div>
 
-    <p class="note-line">Batasan tier gratis: Render idle-sleep (lihat tip di atas) · Supabase project <i>pause</i> otomatis setelah ±7 hari tanpa aktivitas (tinggal klik "Resume" di dashboard) · GitHub Pages tanpa batas waktu tapi cuma file statis. Cukup untuk demo/skala kecil; untuk pemakaian produksi sungguhan pertimbangkan tier berbayar atau VPS sendiri.</p>
+    <p class="note-line">Batasan tier gratis: Render idle-sleep (lihat tip di langkah 3) · Supabase project <i>pause</i> otomatis setelah ±7 hari tanpa aktivitas (tinggal klik "Resume" di dashboard) · GitHub Pages tanpa batas waktu tapi cuma file statis. Cukup untuk demo/skala kecil; untuk pemakaian produksi sungguhan pertimbangkan tier berbayar atau VPS sendiri.</p>
   </section>
 
 </main>
