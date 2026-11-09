@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { salesChannelsApi } from '../api/salesChannels';
 import type { SalesChannelDto, UpsertSalesChannelDto } from '../api/types';
 import { Modal } from '../components/Modal';
+import { PageHeader } from '../components/PageHeader';
 
 interface ChannelForm {
   code: string;
@@ -95,28 +96,31 @@ export function SalesChannelsPage() {
 
   return (
     <div>
-      <div className="page-header">
-        <h1>Kanal Penjualan</h1>
-        <button type="button" className="btn btn-primary" onClick={openCreate}>
-          + Tambah Kanal
-        </button>
-      </div>
+      <PageHeader
+        title="Kanal Penjualan"
+        description="Jalur penjualan produk (mis. Distributor, Retail) beserta margin tambahan default tiap jalur, dipakai saat Tetapkan Harga Jual."
+        actions={
+          <button type="button" className="btn btn-primary" onClick={openCreate}>
+            + Tambah Kanal
+          </button>
+        }
+      />
 
       {error && <div className="alert alert-error">{error}</div>}
       {loading ? (
         <p className="muted">Memuat...</p>
       ) : channels.length === 0 ? (
-        <p className="muted">Belum ada kanal.</p>
+        <p className="muted">Belum ada kanal penjualan.</p>
       ) : (
         <div className="table-wrap">
           <table>
             <thead>
               <tr>
                 <th className="num">Urutan</th>
-                <th>Code</th>
-                <th>Name</th>
-                <th className="num">Margin default</th>
-                <th>Active</th>
+                <th>Kode</th>
+                <th>Nama</th>
+                <th className="num">Margin Default</th>
+                <th>Aktif</th>
                 <th></th>
               </tr>
             </thead>
@@ -149,15 +153,15 @@ export function SalesChannelsPage() {
             {formError && <div className="alert alert-error">{formError}</div>}
 
             <label>
-              Code
-              <input value={form.code} maxLength={20} required onChange={(e) => setForm({ ...form, code: e.target.value })} />
+              Kode
+              <input value={form.code} maxLength={20} required placeholder="mis. DIST" onChange={(e) => setForm({ ...form, code: e.target.value })} />
             </label>
             <label>
-              Name
-              <input value={form.name} maxLength={60} required onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              Nama
+              <input value={form.name} maxLength={60} required placeholder="mis. Distributor" onChange={(e) => setForm({ ...form, name: e.target.value })} />
             </label>
             <label>
-              Margin default (%)
+              Margin Default (%)
               <input
                 type="number"
                 step="any"
@@ -165,9 +169,10 @@ export function SalesChannelsPage() {
                 value={form.marginPct}
                 onChange={(e) => setForm({ ...form, marginPct: e.target.value })}
               />
+              <span className="field-hint">Margin tambahan standar untuk kanal ini saat menetapkan harga jual.</span>
             </label>
             <label>
-              Urutan
+              Urutan Tampil
               <input
                 type="number"
                 value={form.sequence}
@@ -176,7 +181,7 @@ export function SalesChannelsPage() {
             </label>
             <label className="checkbox">
               <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} />
-              Active
+              Aktif
             </label>
 
             <div className="form-actions">

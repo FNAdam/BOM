@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { suppliersApi } from '../api/suppliers';
 import type { SupplierDto, UpsertSupplierDto } from '../api/types';
 import { Modal } from '../components/Modal';
+import { PageHeader } from '../components/PageHeader';
 
 const emptyForm: UpsertSupplierDto = {
   code: '',
@@ -87,12 +88,15 @@ export function SuppliersPage() {
 
   return (
     <div>
-      <div className="page-header">
-        <h1>Suppliers</h1>
-        <button type="button" className="btn btn-primary" onClick={openCreate}>
-          + Tambah Supplier
-        </button>
-      </div>
+      <PageHeader
+        title="Supplier"
+        description="Daftar pemasok bahan baku/kemasan. Lead Time dipakai MRP untuk hitung kapan harus pesan."
+        actions={
+          <button type="button" className="btn btn-primary" onClick={openCreate}>
+            + Tambah Supplier
+          </button>
+        }
+      />
 
       {error && <div className="alert alert-error">{error}</div>}
       {loading ? (
@@ -104,10 +108,10 @@ export function SuppliersPage() {
           <table>
             <thead>
               <tr>
-                <th>Code</th>
-                <th>Name</th>
+                <th>Kode</th>
+                <th>Nama</th>
                 <th className="num">Lead Time (hari)</th>
-                <th>Active</th>
+                <th>Aktif</th>
                 <th></th>
               </tr>
             </thead>
@@ -139,33 +143,36 @@ export function SuppliersPage() {
             {formError && <div className="alert alert-error">{formError}</div>}
 
             <label>
-              Code
+              Kode
               <input
                 value={form.code}
                 maxLength={20}
                 required
+                placeholder="mis. SUP-001"
                 onChange={(e) => setForm({ ...form, code: e.target.value })}
               />
             </label>
 
             <label>
-              Name
+              Nama
               <input
                 value={form.name}
                 maxLength={150}
                 required
+                placeholder="mis. CV Sumber Rejeki"
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
               />
             </label>
 
             <label>
-              Lead Time (hari, opsional)
+              Lead Time / Waktu Tunggu (hari, opsional)
               <input
                 type="number"
                 min="0"
                 value={form.leadTimeDays ?? ''}
                 onChange={(e) => setForm({ ...form, leadTimeDays: e.target.value ? Number(e.target.value) : null })}
               />
+              <span className="field-hint">Berapa hari dari pesan sampai barang datang.</span>
             </label>
 
             <label className="checkbox">
@@ -174,7 +181,7 @@ export function SuppliersPage() {
                 checked={form.isActive}
                 onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
               />
-              Active
+              Aktif
             </label>
 
             <div className="form-actions">

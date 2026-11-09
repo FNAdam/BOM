@@ -11,6 +11,8 @@ import {
   type UpsertItemDto,
 } from '../api/types';
 import { Modal } from '../components/Modal';
+import { PageHeader } from '../components/PageHeader';
+import { costingMethodLabel, itemTypeLabel } from '../labels';
 
 const emptyForm: UpsertItemDto = {
   code: '',
@@ -137,31 +139,34 @@ export function ItemsPage() {
 
   return (
     <div>
-      <div className="page-header">
-        <h1>Items</h1>
-        <button type="button" className="btn btn-primary" onClick={openCreate}>
-          + Tambah Item
-        </button>
-      </div>
+      <PageHeader
+        title="Bahan & Produk"
+        description="Daftar induk semua bahan baku, kemasan, produk setengah jadi, dan produk jadi yang dipakai di resep."
+        actions={
+          <button type="button" className="btn btn-primary" onClick={openCreate}>
+            + Tambah Item
+          </button>
+        }
+      />
 
       {error && <div className="alert alert-error">{error}</div>}
       {loading ? (
         <p className="muted">Memuat...</p>
       ) : items.length === 0 ? (
-        <p className="muted">Belum ada item.</p>
+        <p className="muted">Belum ada item. Klik "+ Tambah Item" untuk mulai.</p>
       ) : (
         <div className="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>Code</th>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Base UOM</th>
-                <th>Category</th>
-                <th className="num">Std Cost</th>
-                <th>Costing</th>
-                <th>Active</th>
+                <th>Kode</th>
+                <th>Nama</th>
+                <th>Tipe</th>
+                <th>Satuan Dasar</th>
+                <th>Kategori</th>
+                <th className="num">Biaya Standar</th>
+                <th>Metode Biaya</th>
+                <th>Aktif</th>
                 <th></th>
               </tr>
             </thead>
@@ -170,11 +175,11 @@ export function ItemsPage() {
                 <tr key={item.id}>
                   <td>{item.code}</td>
                   <td>{item.name}</td>
-                  <td>{item.type}</td>
+                  <td>{itemTypeLabel(item.type)}</td>
                   <td>{item.baseUomCode}</td>
                   <td>{item.categoryName ?? '-'}</td>
                   <td className="num">{item.standardMaterialCost.toLocaleString('id-ID')}</td>
-                  <td>{item.costingMethod}</td>
+                  <td>{costingMethodLabel(item.costingMethod)}</td>
                   <td>{item.isActive ? 'Ya' : 'Tidak'}</td>
                   <td className="actions">
                     <button type="button" className="btn btn-sm" onClick={() => openEdit(item)}>
@@ -197,12 +202,13 @@ export function ItemsPage() {
             {formError && <div className="alert alert-error">{formError}</div>}
 
             <label>
-              Code
+              Kode
               <div className="input-with-action">
                 <input
                   value={form.code}
                   maxLength={30}
                   required
+                  placeholder="mis. RM-0001"
                   onChange={(e) => setForm({ ...form, code: e.target.value })}
                 />
                 {editingId === null && (
@@ -220,28 +226,32 @@ export function ItemsPage() {
             </label>
 
             <label>
-              Name
+              Nama
               <input
                 value={form.name}
                 maxLength={150}
                 required
+                placeholder="mis. Kopi Bubuk Robusta"
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
               />
             </label>
 
             <label>
-              Type
+              Tipe
               <select value={form.type} onChange={(e) => handleTypeChange(e.target.value as ItemDto['type'])}>
                 {ITEM_TYPES.map((t) => (
                   <option key={t} value={t}>
-                    {t}
+                    {itemTypeLabel(t)}
                   </option>
                 ))}
               </select>
+              <span className="field-hint">
+                Bahan Baku/Kemasan = dibeli langsung. Setengah Jadi/Produk Jadi = dibuat lewat resep (BOM).
+              </span>
             </label>
 
             <label>
-              Base UOM
+              Satuan Dasar
               <select
                 value={form.baseUomId}
                 required
@@ -259,7 +269,7 @@ export function ItemsPage() {
             </label>
 
             <label>
-              Category
+              Kategori (opsional)
               <select
                 value={form.categoryId ?? ''}
                 onChange={(e) => setForm({ ...form, categoryId: e.target.value ? Number(e.target.value) : null })}
@@ -274,7 +284,7 @@ export function ItemsPage() {
             </label>
 
             <label>
-              Standard Material Cost
+              Biaya Standar / {uoms.find((u) => u.id === form.baseUomId)?.code ?? 'satuan'}
               <input
                 type="number"
                 step="0.0001"
@@ -282,30 +292,39 @@ export function ItemsPage() {
                 value={form.standardMaterialCost}
                 onChange={(e) => setForm({ ...form, standardMaterialCost: Number(e.target.value) })}
               />
+              <span className="field-hint">
+                Untuk item dibeli: harga per satuan kalau belum ada harga supplier. Untuk item ber-resep, biaya
+                dihitung otomatis - angka ini diabaikan.
+              </span>
             </label>
 
             <label>
-              Costing Method
+              Metode Biaya
               <select
                 value={form.costingMethod}
                 onChange={(e) => setForm({ ...form, costingMethod: e.target.value as ItemDto['costingMethod'] })}
               >
                 {COSTING_METHODS.map((m) => (
                   <option key={m} value={m}>
-                    {m}
+                    {costingMethodLabel(m)}
                   </option>
                 ))}
               </select>
             </label>
 
             <label>
-              Density (opsional)
+              Massa Jenis / Density (opsional)
               <input
                 type="number"
                 step="0.000001"
+                placeholder="mis. 1.03 (kg per liter)"
                 value={form.density ?? ''}
                 onChange={(e) => setForm({ ...form, density: e.target.value ? Number(e.target.value) : null })}
               />
+              <span className="field-hint">
+                Isi hanya kalau bahan ini dipakai di resep dengan satuan beda dimensi (mis. ditimbang dalam kg
+                tapi dipakai di resep dalam liter).
+              </span>
             </label>
 
             <label className="checkbox">
@@ -314,7 +333,7 @@ export function ItemsPage() {
                 checked={form.isActive}
                 onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
               />
-              Active
+              Aktif (muncul di pilihan resep/transaksi baru)
             </label>
 
             <div className="form-actions">

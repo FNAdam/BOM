@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { uomsApi } from '../api/uoms';
 import { UOM_TYPES, type UomDto, type UpsertUomDto } from '../api/types';
 import { Modal } from '../components/Modal';
+import { PageHeader } from '../components/PageHeader';
+import { uomTypeLabel } from '../labels';
 
 const emptyForm: UpsertUomDto = {
   code: '',
@@ -83,28 +85,31 @@ export function UomsPage() {
 
   return (
     <div>
-      <div className="page-header">
-        <h1>Satuan Ukur (UOM)</h1>
-        <button type="button" className="btn btn-primary" onClick={openCreate}>
-          + Tambah UOM
-        </button>
-      </div>
+      <PageHeader
+        title="Satuan Ukur"
+        description="Daftar satuan (kg, g, L, ml, pcs, dst) beserta faktor konversinya ke satuan dasar per jenis."
+        actions={
+          <button type="button" className="btn btn-primary" onClick={openCreate}>
+            + Tambah Satuan
+          </button>
+        }
+      />
 
       {error && <div className="alert alert-error">{error}</div>}
       {loading ? (
         <p className="muted">Memuat...</p>
       ) : uoms.length === 0 ? (
-        <p className="muted">Belum ada UOM.</p>
+        <p className="muted">Belum ada satuan ukur.</p>
       ) : (
         <div className="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>Code</th>
-                <th>Name</th>
-                <th>Type</th>
-                <th className="num">Factor to Base</th>
-                <th>Base?</th>
+                <th>Kode</th>
+                <th>Nama</th>
+                <th>Jenis</th>
+                <th className="num">Faktor ke Satuan Dasar</th>
+                <th>Satuan Dasar?</th>
                 <th></th>
               </tr>
             </thead>
@@ -113,7 +118,7 @@ export function UomsPage() {
                 <tr key={uom.id}>
                   <td>{uom.code}</td>
                   <td>{uom.name}</td>
-                  <td>{uom.type}</td>
+                  <td>{uomTypeLabel(uom.type)}</td>
                   <td className="num">{uom.factorToBase}</td>
                   <td>{uom.isBase ? 'Ya' : 'Tidak'}</td>
                   <td className="actions">
@@ -137,38 +142,43 @@ export function UomsPage() {
             {formError && <div className="alert alert-error">{formError}</div>}
 
             <label>
-              Code
+              Kode
               <input
                 value={form.code}
                 maxLength={10}
                 required
+                placeholder="mis. kg, g, L, ml, pcs"
                 onChange={(e) => setForm({ ...form, code: e.target.value })}
               />
             </label>
 
             <label>
-              Name
+              Nama
               <input
                 value={form.name}
                 maxLength={50}
                 required
+                placeholder="mis. Kilogram"
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
               />
             </label>
 
             <label>
-              Type
+              Jenis
               <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as UomDto['type'] })}>
                 {UOM_TYPES.map((t) => (
                   <option key={t} value={t}>
-                    {t}
+                    {uomTypeLabel(t)}
                   </option>
                 ))}
               </select>
+              <span className="field-hint">
+                Konversi cuma bisa antar satuan dengan jenis yang sama (Berat ke Berat, Volume ke Volume, dst).
+              </span>
             </label>
 
             <label>
-              Factor to Base
+              Faktor ke Satuan Dasar
               <input
                 type="number"
                 step="0.000001"
@@ -176,6 +186,9 @@ export function UomsPage() {
                 value={form.factorToBase}
                 onChange={(e) => setForm({ ...form, factorToBase: Number(e.target.value) })}
               />
+              <span className="field-hint">
+                Berapa satuan dasar yang sama dengan 1 satuan ini. Contoh: 1 gram = 0,001 kg -&gt; isi 0,001.
+              </span>
             </label>
 
             <label className="checkbox">
@@ -184,7 +197,7 @@ export function UomsPage() {
                 checked={form.isBase}
                 onChange={(e) => setForm({ ...form, isBase: e.target.checked })}
               />
-              Satuan dasar (base)
+              Ini satuan dasar untuk jenisnya (faktor otomatis 1)
             </label>
 
             <div className="form-actions">

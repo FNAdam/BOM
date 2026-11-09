@@ -9,6 +9,8 @@ import type {
   ProductionStatus,
 } from '../api/types';
 import { Modal } from '../components/Modal';
+import { PageHeader } from '../components/PageHeader';
+import { productionStatusLabel } from '../labels';
 
 function rupiah(n: number): string {
   return n.toLocaleString('id-ID', {
@@ -30,7 +32,7 @@ const STATUS_BADGE: Record<ProductionStatus, string> = {
 };
 
 function StatusBadge({ status }: { status: ProductionStatus }) {
-  return <span className={`badge ${STATUS_BADGE[status]}`}>{status}</span>;
+  return <span className={`badge ${STATUS_BADGE[status]}`}>{productionStatusLabel(status)}</span>;
 }
 
 /** Kelas warna variance: positif = tidak menguntungkan (merah), negatif = menguntungkan (hijau). */
@@ -68,12 +70,15 @@ export function ProductionPage() {
 
   return (
     <div>
-      <div className="page-header">
-        <h1>Produksi &amp; COGS</h1>
-        <button type="button" className="btn btn-primary" onClick={() => setCreating(true)}>
-          + Buat order
-        </button>
-      </div>
+      <PageHeader
+        title="Produksi & Biaya (COGS)"
+        description="Catat setiap batch produksi: bahan yang benar-benar dipakai dan hasil sebenarnya, lalu lihat biaya aktual vs. biaya standar."
+        actions={
+          <button type="button" className="btn btn-primary" onClick={() => setCreating(true)}>
+            + Buat Order Produksi
+          </button>
+        }
+      />
 
       <div className="filters">
         <label className="filter">
@@ -83,9 +88,9 @@ export function ProductionPage() {
             onChange={(e) => setStatusFilter(e.target.value as ProductionStatus | '')}
           >
             <option value="">Semua</option>
-            <option value="Open">Open</option>
-            <option value="Closed">Closed</option>
-            <option value="Cancelled">Cancelled</option>
+            <option value="Open">{productionStatusLabel('Open')}</option>
+            <option value="Closed">{productionStatusLabel('Closed')}</option>
+            <option value="Cancelled">{productionStatusLabel('Cancelled')}</option>
           </select>
         </label>
       </div>
@@ -95,17 +100,17 @@ export function ProductionPage() {
       {loading ? (
         <p className="muted">Memuat...</p>
       ) : orders.length === 0 ? (
-        <p className="muted">Belum ada perintah produksi.</p>
+        <p className="muted">Belum ada order produksi. Klik "+ Buat Order Produksi" untuk mulai.</p>
       ) : (
         <div className="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>Batch</th>
+                <th>No. Batch</th>
                 <th>Produk</th>
                 <th>Status</th>
-                <th className="num">Planned</th>
-                <th className="num">Actual</th>
+                <th className="num">Rencana</th>
+                <th className="num">Aktual</th>
                 <th>Satuan</th>
                 <th></th>
               </tr>
@@ -213,24 +218,24 @@ function CreateOrderModal({
   }
 
   return (
-    <Modal title="Buat perintah produksi" onClose={onClose}>
+    <Modal title="Buat Order Produksi" onClose={onClose}>
       <form onSubmit={handleSubmit}>
         {error && <div className="alert alert-error">{error}</div>}
 
         <label>
-          BOM (Active)
+          Resep (yang Aktif)
           <select value={bomId} onChange={(e) => setBomId(e.target.value ? Number(e.target.value) : '')} required>
-            <option value="">-- pilih BOM --</option>
+            <option value="">-- pilih resep --</option>
             {boms.map((b) => (
               <option key={b.id} value={b.id}>
-                {b.productCode} - {b.productName} (v{b.version}, out {qty(b.outputQuantity)} {b.outputUomCode})
+                {b.productCode} - {b.productName} (v{b.version}, hasil {qty(b.outputQuantity)} {b.outputUomCode})
               </option>
             ))}
           </select>
         </label>
 
         <label>
-          Planned Qty {selectedBom ? `(${selectedBom.outputUomCode})` : ''}
+          Rencana Jumlah {selectedBom ? `(${selectedBom.outputUomCode})` : ''}
           <input
             type="number"
             step="0.000001"
@@ -242,11 +247,12 @@ function CreateOrderModal({
         </label>
 
         <label>
-          Batch No
+          No. Batch
           <input
             type="text"
             maxLength={40}
             required
+            placeholder="mis. BATCH-2026-001"
             value={batchNo}
             onChange={(e) => setBatchNo(e.target.value)}
           />
@@ -267,7 +273,7 @@ function CreateOrderModal({
             Batal
           </button>
           <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? 'Menyimpan...' : 'Buat order'}
+            {saving ? 'Menyimpan...' : 'Buat Order'}
           </button>
         </div>
       </form>
@@ -367,34 +373,39 @@ function OrderDetailModal({
               Status: <StatusBadge status={order.status} />
             </span>
             <span>
-              Planned: <strong>{qty(order.plannedQty)}</strong> {order.outputUomCode}
+              Rencana: <strong>{qty(order.plannedQty)}</strong> {order.outputUomCode}
             </span>
             {order.actualQty != null && (
               <span>
-                Actual: <strong>{qty(order.actualQty)}</strong> {order.outputUomCode}
+                Hasil Aktual: <strong>{qty(order.actualQty)}</strong> {order.outputUomCode}
               </span>
             )}
           </div>
 
           <div className="section-header">
-            <h2>Konsumsi komponen</h2>
+            <h2>Bahan yang Dipakai</h2>
             {isOpen && (
               <button type="button" className="btn btn-sm" disabled={busy} onClick={saveConsumption}>
-                Simpan konsumsi
+                Simpan Pemakaian
               </button>
             )}
           </div>
+          {isOpen && (
+            <p className="muted" style={{ marginTop: -6 }}>
+              Isi kolom Aktual dengan jumlah bahan yang <b>sungguh-sungguh dipakai</b> (boleh beda dari rencana).
+            </p>
+          )}
 
           <div className="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Komponen</th>
-                  <th className="num">Planned</th>
-                  <th className="num">Actual</th>
+                  <th>Bahan</th>
+                  <th className="num">Rencana</th>
+                  <th className="num">Aktual</th>
                   <th>Satuan</th>
-                  {!isOpen && <th className="num">Unit Cost</th>}
-                  {!isOpen && <th className="num">Actual Cost</th>}
+                  {!isOpen && <th className="num">Biaya / satuan</th>}
+                  {!isOpen && <th className="num">Total Biaya</th>}
                 </tr>
               </thead>
               <tbody>
@@ -431,11 +442,15 @@ function OrderDetailModal({
           {isOpen && (
             <div className="close-box">
               <div className="section-header">
-                <h2>Tutup order</h2>
+                <h2>Selesaikan Order</h2>
               </div>
+              <p className="muted" style={{ marginTop: -6 }}>
+                Isi jumlah hasil jadi yang sebenarnya keluar dari batch ini, lalu tutup order untuk menghitung
+                biaya aktual (COGS) dan selisihnya dari biaya standar.
+              </p>
               <div className="explode-controls">
                 <label>
-                  Actual output ({order.outputUomCode})
+                  Hasil Aktual ({order.outputUomCode})
                   <input
                     type="number"
                     step="0.000001"
@@ -445,7 +460,7 @@ function OrderDetailModal({
                   />
                 </label>
                 <button type="button" className="btn btn-primary" disabled={busy} onClick={closeOrder}>
-                  {busy ? 'Memproses...' : 'Tutup order & hitung COGS'}
+                  {busy ? 'Memproses...' : 'Selesaikan & Hitung Biaya'}
                 </button>
               </div>
             </div>
@@ -464,47 +479,47 @@ function CogsReport({ report }: { report: CogsReportDto }) {
   return (
     <>
       <div className="section-header">
-        <h2>Laporan COGS</h2>
+        <h2>Laporan Biaya Aktual (COGS)</h2>
       </div>
 
       <div className="cost-summary">
         <div className="cost-card">
-          <span className="cost-label">Material</span>
+          <span className="cost-label">Biaya Bahan</span>
           <span className="cost-value">{rupiah(report.materialCost)}</span>
         </div>
         <div className="cost-card">
-          <span className="cost-label">Konversi</span>
+          <span className="cost-label">Tenaga Kerja &amp; Overhead</span>
           <span className="cost-value">{rupiah(report.conversionCost)}</span>
         </div>
         <div className="cost-card">
-          <span className="cost-label">COGS total</span>
+          <span className="cost-label">Total Biaya Aktual</span>
           <span className="cost-value">{rupiah(report.cogsTotal)}</span>
         </div>
         <div className="cost-card cost-total">
-          <span className="cost-label">COGS / unit</span>
+          <span className="cost-label">Biaya Aktual / unit</span>
           <span className="cost-value">{rupiah(report.cogsUnit)}</span>
         </div>
       </div>
 
       <div className="cost-summary">
         <div className="cost-card">
-          <span className="cost-label">Standar total</span>
+          <span className="cost-label">Total Biaya Standar</span>
           <span className="cost-value">{rupiah(report.standardTotal)}</span>
         </div>
         <div className="cost-card">
-          <span className="cost-label">Material variance</span>
+          <span className="cost-label">Selisih Biaya Bahan</span>
           <span className={`cost-value ${varianceClass(report.materialVariance)}`}>
             {rupiah(report.materialVariance)}
           </span>
         </div>
         <div className="cost-card">
-          <span className="cost-label">Yield variance</span>
+          <span className="cost-label">Selisih Rendemen</span>
           <span className={`cost-value ${varianceClass(report.yieldVariance)}`}>
             {rupiah(report.yieldVariance)}
           </span>
         </div>
         <div className="cost-card">
-          <span className="cost-label">Total variance</span>
+          <span className="cost-label">Total Selisih</span>
           <span className={`cost-value ${varianceClass(report.totalVariance)}`}>
             {rupiah(report.totalVariance)}
           </span>
@@ -512,24 +527,24 @@ function CogsReport({ report }: { report: CogsReportDto }) {
       </div>
 
       <p className="muted variance-hint">
-        Variance positif (merah) = tidak menguntungkan (biaya aktual di atas standar);
-        negatif (hijau) = menguntungkan.
+        Selisih warna merah = biaya aktual lebih mahal dari standar (rugi); warna hijau = lebih hemat dari
+        standar (untung).
       </p>
 
       <div className="section-header">
-        <h2>Variance per komponen</h2>
+        <h2>Rincian Selisih per Bahan</h2>
       </div>
       <div className="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>Komponen</th>
-              <th className="num">Actual Qty</th>
-              <th className="num">Std Qty</th>
-              <th className="num">Actual/unit</th>
-              <th className="num">Std/unit</th>
-              <th className="num">Price var.</th>
-              <th className="num">Usage var.</th>
+              <th>Bahan</th>
+              <th className="num">Qty Aktual</th>
+              <th className="num">Qty Standar</th>
+              <th className="num">Harga Aktual/unit</th>
+              <th className="num">Harga Standar/unit</th>
+              <th className="num">Selisih Harga</th>
+              <th className="num">Selisih Pemakaian</th>
             </tr>
           </thead>
           <tbody>

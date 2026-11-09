@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { dashboardApi } from '../api/dashboard';
 import type { DashboardMarginDto } from '../api/types';
+import { PageHeader } from '../components/PageHeader';
+import { itemTypeLabel } from '../labels';
 
 function rupiah(n: number): string {
   return n.toLocaleString('id-ID', {
@@ -41,12 +43,15 @@ export function DashboardPage() {
 
   return (
     <div>
-      <div className="page-header">
-        <h1>Dashboard Margin</h1>
-        <button type="button" className="btn" disabled={loading} onClick={() => void load()}>
-          {loading ? 'Memuat...' : 'Muat ulang'}
-        </button>
-      </div>
+      <PageHeader
+        title="Dashboard Margin"
+        description="Ringkasan untung-rugi semua produk yang sudah punya harga jual atau resep aktif."
+        actions={
+          <button type="button" className="btn" disabled={loading} onClick={() => void load()}>
+            {loading ? 'Memuat...' : '🔄 Muat ulang'}
+          </button>
+        }
+      />
 
       {error && <div className="alert alert-error">{error}</div>}
       {loading && !data && <p className="muted">Memuat...</p>}
@@ -55,7 +60,7 @@ export function DashboardPage() {
         <>
           <div className="cost-summary dashboard-summary">
             <div className="cost-card">
-              <span className="cost-label">Jumlah produk</span>
+              <span className="cost-label">Jumlah produk dihitung</span>
               <span className="cost-value">{data.summary.productCount}</span>
             </div>
             <div className="cost-card">
@@ -63,15 +68,28 @@ export function DashboardPage() {
               <span className="cost-value">{percent(data.summary.avgMarginPct)}</span>
             </div>
             <div className={`cost-card${data.summary.belowMinCount > 0 ? ' cost-warn' : ''}`}>
-              <span className="cost-label">Di bawah minimum ({percent(data.minMarginPercent)})</span>
+              <span className="cost-label">Margin di bawah minimum ({percent(data.minMarginPercent)})</span>
               <span className="cost-value">{data.summary.belowMinCount}</span>
             </div>
           </div>
 
           {data.items.length === 0 ? (
-            <p className="muted">
-              Belum ada produk ber-harga (price list Active) atau ber-BOM Active untuk dihitung.
-            </p>
+            <div className="getting-started">
+              <strong>Belum ada yang bisa dihitung.</strong> Ikuti urutan ini supaya produk muncul di sini:
+              <ol>
+                <li>
+                  Buat bahan baku &amp; produk di menu <a href="#/items">📦 Bahan &amp; Produk</a>.
+                </li>
+                <li>
+                  Susun resepnya di menu <a href="#/boms">📋 Resep Produk (BOM)</a>, lalu klik <b>Aktifkan</b>.
+                </li>
+                <li>
+                  Tetapkan harga jualnya di menu <a href="#/pricing">🏷️ Tetapkan Harga Jual</a>, lalu simpan &amp;
+                  aktifkan.
+                </li>
+              </ol>
+              Setelah itu, margin untung-rugi produk tersebut akan tampil otomatis di halaman ini.
+            </div>
           ) : (
             <div className="table-wrap">
               <table>
@@ -79,9 +97,9 @@ export function DashboardPage() {
                   <tr>
                     <th>Produk</th>
                     <th>Tipe</th>
-                    <th className="num">Std Cost</th>
-                    <th className="num">Harga ex-factory</th>
-                    <th className="num">Kontribusi</th>
+                    <th className="num">Biaya Produksi</th>
+                    <th className="num">Harga Jual (ex-factory)</th>
+                    <th className="num">Untung per Unit</th>
                     <th className="num">Margin</th>
                     <th>Status</th>
                   </tr>
@@ -92,10 +110,10 @@ export function DashboardPage() {
                       <td>
                         {it.productCode} - {it.productName}
                         {it.hasActivePriceList && (
-                          <span className="badge badge-active tree-tag">Price list</span>
+                          <span className="badge badge-active tree-tag">Harga aktif</span>
                         )}
                       </td>
-                      <td>{it.itemType}</td>
+                      <td>{itemTypeLabel(it.itemType)}</td>
                       <td className="num">{rupiah(it.standardCost)}</td>
                       <td className="num">{rupiah(it.exFactoryPrice)}</td>
                       <td className="num">{rupiah(it.contributionMargin)}</td>

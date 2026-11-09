@@ -10,11 +10,13 @@ import {
   type ItemDto,
 } from '../api/types';
 import { Modal } from '../components/Modal';
+import { PageHeader } from '../components/PageHeader';
+import { bomStatusLabel, itemTypeLabel } from '../labels';
 
 const PRODUCT_TYPES = new Set(['SemiFinished', 'FinishedGood']);
 
 function StatusBadge({ status }: { status: BomStatus }) {
-  return <span className={`badge badge-${status.toLowerCase()}`}>{status}</span>;
+  return <span className={`badge badge-${status.toLowerCase()}`}>{bomStatusLabel(status)}</span>;
 }
 
 function fmt(n: number): string {
@@ -30,10 +32,10 @@ function ExplosionRow({ node }: { node: BomExplosionNodeDto }) {
           <span style={{ paddingLeft: `${node.level * 20}px` }}>
             {node.level > 0 && <span className="tree-branch">└ </span>}
             {node.itemCode} - {node.itemName}
-            {node.hasBom && <span className="badge badge-active tree-tag">BOM</span>}
+            {node.hasBom && <span className="badge badge-active tree-tag">Punya resep</span>}
           </span>
         </td>
-        <td>{node.itemType}</td>
+        <td>{itemTypeLabel(node.itemType)}</td>
         <td className="num">{fmt(node.quantity)}</td>
         <td className="num">{fmt(node.scrapPercent * 100)}%</td>
         <td className="num">
@@ -154,12 +156,15 @@ export function BomsPage() {
 
   return (
     <div>
-      <div className="page-header">
-        <h1>BOM</h1>
-        <button type="button" className="btn btn-primary" onClick={() => navigate('/boms/new')}>
-          + BOM Baru
-        </button>
-      </div>
+      <PageHeader
+        title="Resep Produk (BOM)"
+        description="Resep/formula tiap produk: bahan apa saja, berapa takarannya, dan berapa persen susutnya. Resep harus berstatus Aktif supaya biaya & stok bisa dihitung."
+        actions={
+          <button type="button" className="btn btn-primary" onClick={() => navigate('/boms/new')}>
+            + Resep Baru
+          </button>
+        }
+      />
 
       <div className="filters">
         <label className="filter">
@@ -185,7 +190,7 @@ export function BomsPage() {
             <option value="">Semua status</option>
             {BOM_STATUSES.map((s) => (
               <option key={s} value={s}>
-                {s}
+                {bomStatusLabel(s)}
               </option>
             ))}
           </select>
@@ -197,7 +202,7 @@ export function BomsPage() {
       {loading ? (
         <p className="muted">Memuat...</p>
       ) : boms.length === 0 ? (
-        <p className="muted">Belum ada BOM.</p>
+        <p className="muted">Belum ada resep. Klik "+ Resep Baru" untuk membuat yang pertama.</p>
       ) : (
         <div className="table-wrap">
           <table>
@@ -206,9 +211,9 @@ export function BomsPage() {
                 <th>Produk</th>
                 <th className="num">Versi</th>
                 <th>Status</th>
-                <th className="num">Output</th>
-                <th className="num">Komponen</th>
-                <th>Efektif</th>
+                <th className="num">Hasil</th>
+                <th className="num">Jml Bahan</th>
+                <th>Berlaku</th>
                 <th></th>
               </tr>
             </thead>
@@ -230,8 +235,13 @@ export function BomsPage() {
                     {bom.effectiveFrom ?? '...'} s/d {bom.effectiveTo ?? '...'}
                   </td>
                   <td className="actions">
-                    <button type="button" className="btn btn-sm" onClick={() => openExplode(bom)}>
-                      Explode
+                    <button
+                      type="button"
+                      className="btn btn-sm"
+                      onClick={() => openExplode(bom)}
+                      title="Lihat rincian kebutuhan bahan untuk jumlah produksi tertentu"
+                    >
+                      Kebutuhan Bahan
                     </button>
                     <button
                       type="button"
@@ -246,8 +256,9 @@ export function BomsPage() {
                         className="btn btn-sm btn-primary"
                         disabled={busy}
                         onClick={() => handleActivate(bom)}
+                        title="Jadikan resep ini yang dipakai untuk hitung biaya & produksi"
                       >
-                        Activate
+                        Aktifkan
                       </button>
                     )}
                     <button
@@ -255,8 +266,9 @@ export function BomsPage() {
                       className="btn btn-sm"
                       disabled={busy}
                       onClick={() => handleNewVersion(bom)}
+                      title="Buat salinan resep ini sebagai Draf baru untuk direvisi"
                     >
-                      New Version
+                      Buat Revisi
                     </button>
                     {bom.status !== 'Active' && (
                       <button
@@ -278,15 +290,18 @@ export function BomsPage() {
 
       {explodeFor && (
         <Modal
-          title={`Explode: ${explodeFor.productCode} v${explodeFor.version}`}
+          title={`Kebutuhan Bahan: ${explodeFor.productCode} v${explodeFor.version}`}
           onClose={() => {
             setExplodeFor(null);
             setExplosion(null);
           }}
         >
+          <p className="muted" style={{ marginTop: 0 }}>
+            Masukkan rencana jumlah produksi untuk melihat total bahan yang dibutuhkan (sudah termasuk susut/scrap).
+          </p>
           <div className="explode-controls">
             <label>
-              Target Qty ({explodeFor.outputUomCode})
+              Rencana Produksi ({explodeFor.outputUomCode})
               <input
                 type="number"
                 step="0.000001"
@@ -307,11 +322,11 @@ export function BomsPage() {
               <table>
                 <thead>
                   <tr>
-                    <th>Item</th>
-                    <th>Type</th>
-                    <th className="num">Qty</th>
-                    <th className="num">Scrap</th>
-                    <th className="num">Efektif</th>
+                    <th>Bahan</th>
+                    <th>Tipe</th>
+                    <th className="num">Qty / resep</th>
+                    <th className="num">Susut</th>
+                    <th className="num">Total Dibutuhkan</th>
                   </tr>
                 </thead>
                 <tbody>

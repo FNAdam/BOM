@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { HashRouter, NavLink, Navigate, Route, Routes } from 'react-router-dom';
 import { clearSession, getUsername, isAuthenticated } from './api/auth';
+import logo from './assets/logo.png';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ItemsPage } from './pages/ItemsPage';
@@ -20,41 +21,46 @@ import { PricingPage } from './pages/PricingPage';
 import { SalesChannelsPage } from './pages/SalesChannelsPage';
 import { PricingSettingsPage } from './pages/PricingSettingsPage';
 
+// Dikelompokkan mengikuti alur kerja asli (data dasar -> resep -> biaya -> produksi -> harga
+// jual), bukan abjad - supaya menu kelihatan seperti langkah, bukan daftar fitur acak.
+// Istilah teknis (BOM, MRP, COGS) tetap ditulis dalam kurung supaya yang sudah familiar tidak
+// kebingungan, sementara nama depannya pakai bahasa sehari-hari.
 const navGroups = [
   {
     group: 'Ringkasan',
-    items: [{ to: '/', label: 'Dashboard' }],
+    items: [{ to: '/', label: 'Dashboard', icon: '🏠' }],
   },
   {
-    group: 'Master Data',
+    group: '1. Data Dasar',
     items: [
-      { to: '/items', label: 'Items' },
-      { to: '/uoms', label: 'Satuan Ukur' },
-      { to: '/suppliers', label: 'Suppliers' },
-      { to: '/prices', label: 'Harga Supplier' },
-      { to: '/boms', label: 'BOM' },
+      { to: '/items', label: 'Bahan & Produk', icon: '📦' },
+      { to: '/uoms', label: 'Satuan Ukur', icon: '📏' },
+      { to: '/suppliers', label: 'Supplier', icon: '🚚' },
+      { to: '/prices', label: 'Harga dari Supplier', icon: '🧾' },
     ],
   },
   {
-    group: 'Transaksi',
+    group: '2. Resep (BOM)',
+    items: [{ to: '/boms', label: 'Resep Produk (BOM)', icon: '📋' }],
+  },
+  {
+    group: '3. Hitung Biaya',
+    items: [{ to: '/costing', label: 'Biaya Produksi (Costing)', icon: '🧮' }],
+  },
+  {
+    group: '4. Produksi & Stok',
     items: [
-      { to: '/mrp', label: 'MRP' },
-      { to: '/production', label: 'Produksi' },
-      { to: '/inventory', label: 'Stok' },
+      { to: '/mrp', label: 'Rencana Belanja (MRP)', icon: '🛒' },
+      { to: '/production', label: 'Produksi (COGS)', icon: '🏭' },
+      { to: '/inventory', label: 'Stok Barang', icon: '📊' },
     ],
   },
   {
-    group: 'Costing & Harga',
+    group: '5. Harga Jual',
     items: [
-      { to: '/costing', label: 'Costing' },
-      { to: '/pricing', label: 'Harga Jual' },
-    ],
-  },
-  {
-    group: 'Pengaturan',
-    items: [
-      { to: '/channels', label: 'Kanal Penjualan' },
-      { to: '/pricing-settings', label: 'Setelan Harga' },
+      { to: '/pricing', label: 'Tetapkan Harga Jual', icon: '🏷️' },
+      { to: '/channels', label: 'Kanal Penjualan', icon: '🧭' },
+      { to: '/pricing-settings', label: 'Setelan Harga', icon: '⚙️' },
     ],
   },
 ];
@@ -79,15 +85,19 @@ function App() {
           <button className="hamburger-btn" onClick={() => setNavOpen(true)} aria-label="Buka menu">
             ☰
           </button>
-          <span className="brand-mark">BOM</span>
+          <span className="logo-badge">
+            <img src={logo} alt="Ramuan BunSa" />
+          </span>
         </div>
 
         <div className={navOpen ? 'nav-overlay open' : 'nav-overlay'} onClick={() => setNavOpen(false)} />
 
         <aside className={navOpen ? 'sidebar open' : 'sidebar'}>
           <div className="brand">
-            <span className="brand-mark">BOM</span>
-            <span className="brand-sub">Bill of Materials</span>
+            <span className="logo-badge">
+              <img src={logo} alt="Ramuan BunSa" />
+            </span>
+            <span className="brand-sub">Sistem Resep &amp; Biaya (BOM)</span>
           </div>
           <nav>
             {navGroups.map((group) => (
@@ -101,6 +111,7 @@ function App() {
                     onClick={() => setNavOpen(false)}
                     className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
                   >
+                    <span className="nav-icon" aria-hidden="true">{item.icon}</span>
                     {item.label}
                   </NavLink>
                 ))}

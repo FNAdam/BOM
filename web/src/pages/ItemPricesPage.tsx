@@ -11,6 +11,7 @@ import type {
   UpsertItemSupplierPriceDto,
 } from '../api/types';
 import { Modal } from '../components/Modal';
+import { PageHeader } from '../components/PageHeader';
 
 const emptyForm: UpsertItemSupplierPriceDto = {
   itemId: 0,
@@ -102,15 +103,18 @@ export function ItemPricesPage() {
 
   return (
     <div>
-      <div className="page-header">
-        <h1>Harga Item - Supplier</h1>
-        <button type="button" className="btn btn-primary" onClick={openCreate} disabled={!canCreate}>
-          + Tambah Harga
-        </button>
-      </div>
+      <PageHeader
+        title="Harga dari Supplier"
+        description="Harga tiap bahan per supplier. Harga dari supplier yang ditandai 'Utama' dipakai saat menghitung biaya resep."
+        actions={
+          <button type="button" className="btn btn-primary" onClick={openCreate} disabled={!canCreate}>
+            + Tambah Harga
+          </button>
+        }
+      />
 
       {!canCreate && !loading && (
-        <div className="alert alert-info">Butuh minimal 1 item, 1 supplier, dan 1 UOM untuk menambah harga.</div>
+        <div className="alert alert-info">Butuh minimal 1 bahan, 1 supplier, dan 1 satuan ukur untuk menambah harga.</div>
       )}
       {error && <div className="alert alert-error">{error}</div>}
 
@@ -125,12 +129,12 @@ export function ItemPricesPage() {
               <tr>
                 <th>Item</th>
                 <th>Supplier</th>
-                <th>UOM</th>
-                <th className="num">Price</th>
-                <th>Currency</th>
-                <th className="num">Min Qty</th>
+                <th>Satuan</th>
+                <th className="num">Harga</th>
+                <th>Mata Uang</th>
+                <th className="num">Min. Order</th>
                 <th>Berlaku</th>
-                <th>Preferred</th>
+                <th>Utama</th>
                 <th></th>
               </tr>
             </thead>
@@ -219,7 +223,7 @@ export function ItemPricesPage() {
             </label>
 
             <label>
-              Price
+              Harga
               <input
                 type="number"
                 step="0.0001"
@@ -230,17 +234,18 @@ export function ItemPricesPage() {
             </label>
 
             <label>
-              Currency
+              Mata Uang
               <input
                 value={form.currency}
                 maxLength={3}
                 required
+                placeholder="IDR"
                 onChange={(e) => setForm({ ...form, currency: e.target.value.toUpperCase() })}
               />
             </label>
 
             <label>
-              Min Order Qty
+              Minimal Order (MOQ)
               <input
                 type="number"
                 step="0.0001"
@@ -248,10 +253,11 @@ export function ItemPricesPage() {
                 value={form.minOrderQty}
                 onChange={(e) => setForm({ ...form, minOrderQty: Number(e.target.value) })}
               />
+              <span className="field-hint">Jumlah minimal yang harus dipesan sekali order ke supplier ini.</span>
             </label>
 
             <label>
-              Effective From (opsional)
+              Berlaku Dari (opsional)
               <input
                 type="date"
                 value={form.effectiveFrom ?? ''}
@@ -260,7 +266,7 @@ export function ItemPricesPage() {
             </label>
 
             <label>
-              Effective To (opsional)
+              Berlaku Sampai (opsional)
               <input
                 type="date"
                 value={form.effectiveTo ?? ''}
@@ -274,7 +280,7 @@ export function ItemPricesPage() {
                 checked={form.isPreferred}
                 onChange={(e) => setForm({ ...form, isPreferred: e.target.checked })}
               />
-              Preferred
+              Jadikan supplier utama untuk item ini (dipakai saat hitung biaya resep)
             </label>
 
             <div className="form-actions">

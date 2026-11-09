@@ -11,6 +11,9 @@ import type {
   UpsertBomDto,
   UpsertBomOperationDto,
 } from '../api/types';
+import { PageHeader } from '../components/PageHeader';
+import { bomStatusLabel } from '../labels';
+import { decToPctStr, pctStrToDec } from '../utils/percent';
 
 const PRODUCT_TYPES = new Set(['SemiFinished', 'FinishedGood']);
 
@@ -145,20 +148,29 @@ export function BomEditorPage() {
 
   if (loading) return <p className="muted">Memuat...</p>;
 
-  const title = editingId === null ? 'BOM Baru' : readOnly ? `BOM (${status}) - hanya baca` : 'Edit BOM';
+  const title =
+    editingId === null
+      ? 'Resep Baru'
+      : readOnly
+        ? `Resep (${bomStatusLabel(status)}) - hanya baca`
+        : 'Edit Resep';
 
   return (
     <div>
-      <div className="page-header">
-        <h1>{title}</h1>
-        <button type="button" className="btn" onClick={() => navigate('/boms')}>
-          Kembali
-        </button>
-      </div>
+      <PageHeader
+        title={title}
+        description="Tentukan produk hasilnya, bahan-bahan dan takarannya, lalu simpan sebagai Draf sebelum diaktifkan."
+        actions={
+          <button type="button" className="btn" onClick={() => navigate('/boms')}>
+            ← Kembali
+          </button>
+        }
+      />
 
       {readOnly && (
         <div className="alert alert-info">
-          BOM berstatus {status} tidak dapat diubah. Gunakan &quot;New Version&quot; untuk merevisi.
+          Resep berstatus {bomStatusLabel(status)} tidak dapat diubah. Gunakan tombol &quot;Buat Revisi&quot; di
+          halaman daftar resep untuk membuat Draf baru.
         </div>
       )}
       {error && <div className="alert alert-error">{error}</div>}
@@ -167,7 +179,7 @@ export function BomEditorPage() {
         <fieldset disabled={readOnly} className="editor-fieldset">
           <div className="form-grid">
             <label>
-              Produk (semi/finished)
+              Produk Hasil (Setengah Jadi / Produk Jadi)
               <select
                 value={productItemId}
                 required
@@ -185,7 +197,7 @@ export function BomEditorPage() {
             </label>
 
             <label>
-              Output Qty
+              Jumlah Hasil (sekali proses)
               <input
                 type="number"
                 step="0.000001"
@@ -193,10 +205,11 @@ export function BomEditorPage() {
                 value={outputQuantity}
                 onChange={(e) => setOutputQuantity(Number(e.target.value))}
               />
+              <span className="field-hint">Resep ini menghasilkan berapa banyak dalam satu kali proses/batch.</span>
             </label>
 
             <label>
-              Output UOM
+              Satuan Hasil
               <select value={outputUomId} required onChange={(e) => setOutputUomId(Number(e.target.value))}>
                 <option value={0} disabled>
                   -- pilih UOM --
@@ -210,19 +223,23 @@ export function BomEditorPage() {
             </label>
 
             <label>
-              Yield (0-1)
+              Rendemen / Yield (%)
               <input
                 type="number"
-                step="0.0001"
+                step="0.01"
                 min="0"
-                max="1"
-                value={yieldPercent}
-                onChange={(e) => setYieldPercent(Number(e.target.value))}
+                max="100"
+                value={decToPctStr(yieldPercent)}
+                onChange={(e) => setYieldPercent(pctStrToDec(e.target.value))}
               />
+              <span className="field-hint">
+                Berapa persen hasil jadi dari 1 kali proses. Isi 100% kalau tidak ada yang terbuang; isi 98%
+                kalau biasanya 2% batch hilang/gagal.
+              </span>
             </label>
 
             <label>
-              Efektif Dari
+              Berlaku Dari
               <input
                 type="date"
                 value={effectiveFrom ?? ''}
@@ -231,7 +248,7 @@ export function BomEditorPage() {
             </label>
 
             <label>
-              Efektif Sampai
+              Berlaku Sampai
               <input
                 type="date"
                 value={effectiveTo ?? ''}
@@ -247,30 +264,30 @@ export function BomEditorPage() {
 
           {/* --- Components --- */}
           <div className="section-header">
-            <h2>Komponen</h2>
+            <h2>Daftar Bahan (Komponen)</h2>
             {!readOnly && (
               <button
                 type="button"
                 className="btn btn-sm"
                 onClick={() => setComponents((prev) => [...prev, emptyComponent(prev.length + 1)])}
               >
-                + Baris
+                + Baris Bahan
               </button>
             )}
           </div>
 
           {components.length === 0 ? (
-            <p className="muted">Belum ada komponen.</p>
+            <p className="muted">Belum ada bahan di resep ini.</p>
           ) : (
             <div className="table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th style={{ width: 60 }}>Seq</th>
-                    <th>Item</th>
-                    <th className="num">Qty</th>
-                    <th>UOM</th>
-                    <th className="num">Scrap</th>
+                    <th style={{ width: 60 }}>Urutan</th>
+                    <th>Bahan</th>
+                    <th className="num">Takaran</th>
+                    <th>Satuan</th>
+                    <th className="num">Susut (%)</th>
                     <th>Opsional</th>
                     <th></th>
                   </tr>
@@ -330,10 +347,10 @@ export function BomEditorPage() {
                       <td>
                         <input
                           type="number"
-                          step="0.0001"
+                          step="0.01"
                           min="0"
-                          value={c.scrapPercent}
-                          onChange={(e) => updateComponent(index, { scrapPercent: Number(e.target.value) })}
+                          value={decToPctStr(c.scrapPercent)}
+                          onChange={(e) => updateComponent(index, { scrapPercent: pctStrToDec(e.target.value) })}
                         />
                       </td>
                       <td>
@@ -363,29 +380,32 @@ export function BomEditorPage() {
 
           {/* --- Operations --- */}
           <div className="section-header">
-            <h2>Operasi (opsional)</h2>
+            <h2>Biaya Tenaga Kerja &amp; Overhead (opsional)</h2>
             {!readOnly && (
               <button
                 type="button"
                 className="btn btn-sm"
                 onClick={() => setOperations((prev) => [...prev, emptyOperation(prev.length + 1)])}
               >
-                + Baris
+                + Baris Biaya
               </button>
             )}
           </div>
+          <p className="muted" style={{ marginTop: -6, marginBottom: 10 }}>
+            Biaya proses produksi di luar bahan baku (mis. upah tenaga kerja, listrik, gas) per 1 satuan hasil.
+          </p>
 
           {operations.length === 0 ? (
-            <p className="muted">Belum ada operasi.</p>
+            <p className="muted">Belum ada biaya tenaga kerja/overhead - resep hanya menghitung biaya bahan.</p>
           ) : (
             <div className="table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th style={{ width: 60 }}>Seq</th>
-                    <th>Nama</th>
-                    <th className="num">Labor / unit</th>
-                    <th className="num">Overhead</th>
+                    <th style={{ width: 60 }}>Urutan</th>
+                    <th>Nama Proses</th>
+                    <th className="num">Tenaga Kerja / unit</th>
+                    <th className="num">Overhead / unit</th>
                     <th></th>
                   </tr>
                 </thead>
@@ -453,7 +473,7 @@ export function BomEditorPage() {
               Batal
             </button>
             <button type="submit" className="btn btn-primary" disabled={saving}>
-              {saving ? 'Menyimpan...' : 'Simpan sebagai Draft'}
+              {saving ? 'Menyimpan...' : 'Simpan sebagai Draf'}
             </button>
           </div>
         )}

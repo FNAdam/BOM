@@ -1,6 +1,7 @@
 import { type FormEvent, useState } from 'react';
 import { api } from '../api/client';
 import { setSession, type LoginResponse } from '../api/auth';
+import logo from '../assets/logo.png';
 
 export function LoginPage({ onLoggedIn }: { onLoggedIn: () => void }) {
   const [username, setUsername] = useState('');
@@ -26,9 +27,11 @@ export function LoginPage({ onLoggedIn }: { onLoggedIn: () => void }) {
   return (
     <div className="login-shell">
       <form className="login-card" onSubmit={handleSubmit}>
-        <div className="brand" style={{ padding: 0, marginBottom: 20 }}>
-          <span className="brand-mark" style={{ color: 'var(--text)' }}>BOM</span>
-          <span className="brand-sub">Bill of Materials</span>
+        <div className="login-logo">
+          <span className="logo-badge">
+            <img src={logo} alt="Ramuan BunSa" />
+          </span>
+          <p className="page-desc" style={{ marginTop: 10 }}>Masuk untuk membuka Sistem Resep &amp; Biaya</p>
         </div>
 
         <label>

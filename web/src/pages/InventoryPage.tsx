@@ -3,6 +3,8 @@ import { inventoryApi } from '../api/inventory';
 import { stockMovementsApi } from '../api/stockMovements';
 import type { InventoryBalanceDto, StockMovementDto, StockMovementType } from '../api/types';
 import { Modal } from '../components/Modal';
+import { PageHeader } from '../components/PageHeader';
+import { stockMovementTypeLabel } from '../labels';
 
 function num(n: number): string {
   return n.toLocaleString('id-ID', { maximumFractionDigits: 6 });
@@ -25,7 +27,7 @@ function MovementType({ type }: { type: StockMovementType }) {
   const sign = dir === 'in' ? '+' : dir === 'out' ? '-' : '~';
   return (
     <span className={`move-type move-${dir}`}>
-      {sign} {type}
+      {sign} {stockMovementTypeLabel(type)}
     </span>
   );
 }
@@ -105,14 +107,14 @@ export function InventoryPage() {
 
   return (
     <div>
-      <div className="page-header">
-        <h1>Stok (On-Hand)</h1>
-      </div>
+      <PageHeader
+        title="Stok Barang"
+        description="Jumlah stok tiap bahan/produk saat ini dan biaya rata-ratanya. Otomatis ter-update saat produksi mencatat pemakaian/hasil."
+      />
 
       <div className="alert alert-info">
-        On-hand &amp; biaya rata-rata bergerak kini hidup dari buku besar (StockMovement): produksi
-        menutup order akan memposting pengeluaran komponen dan penerimaan produk jadi otomatis.
-        Set on-hand manual di sini hanya untuk saldo awal / koreksi.
+        Stok &amp; biaya rata-rata di sini otomatis bergerak dari riwayat produksi (bahan terpakai keluar,
+        produk jadi masuk). "Set Saldo Awal" di bawah hanya untuk mengisi stok awal atau koreksi manual.
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
@@ -125,11 +127,11 @@ export function InventoryPage() {
           <table>
             <thead>
               <tr>
-                <th>Code</th>
-                <th>Name</th>
-                <th>Base UOM</th>
-                <th className="num">Qty On-Hand</th>
-                <th className="num">Avg Cost</th>
+                <th>Kode</th>
+                <th>Nama</th>
+                <th>Satuan</th>
+                <th className="num">Stok Saat Ini</th>
+                <th className="num">Biaya Rata-rata</th>
                 <th></th>
               </tr>
             </thead>
@@ -154,7 +156,7 @@ export function InventoryPage() {
       )}
 
       <div className="section-header">
-        <h2>Riwayat pergerakan stok</h2>
+        <h2>Riwayat Keluar-Masuk Stok</h2>
         <label className="filter">
           Item
           <select
@@ -182,10 +184,10 @@ export function InventoryPage() {
               <tr>
                 <th>Tanggal</th>
                 <th>Item</th>
-                <th>Tipe</th>
+                <th>Jenis</th>
                 <th className="num">Qty</th>
-                <th className="num">Unit Cost</th>
-                <th>Ref</th>
+                <th className="num">Biaya / satuan</th>
+                <th>Referensi</th>
                 <th>Catatan</th>
               </tr>
             </thead>
@@ -211,12 +213,12 @@ export function InventoryPage() {
       )}
 
       {editing && (
-        <Modal title={`Set saldo awal: ${editing.itemCode}`} onClose={() => setEditing(null)}>
+        <Modal title={`Set Saldo Awal: ${editing.itemCode}`} onClose={() => setEditing(null)}>
           <form onSubmit={handleSubmit}>
             {formError && <div className="alert alert-error">{formError}</div>}
 
             <label>
-              Qty On-Hand ({editing.uomCode})
+              Jumlah Stok ({editing.uomCode})
               <input
                 type="number"
                 step="0.000001"
@@ -228,7 +230,7 @@ export function InventoryPage() {
             </label>
 
             <label>
-              Average Cost (opsional)
+              Biaya Rata-rata / satuan (opsional)
               <input
                 type="number"
                 step="0.0001"

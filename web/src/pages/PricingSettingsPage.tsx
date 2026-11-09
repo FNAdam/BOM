@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { pricingSettingsApi } from '../api/pricingSettings';
 import { ROUNDING_RULES, type RoundingRule, type UpsertPricingSettingDto } from '../api/types';
+import { PageHeader } from '../components/PageHeader';
+import { roundingRuleLabel } from '../labels';
 
 interface SettingForm {
   targetPct: string;
@@ -66,9 +68,10 @@ export function PricingSettingsPage() {
 
   return (
     <div>
-      <div className="page-header">
-        <h1>Setelan Harga</h1>
-      </div>
+      <PageHeader
+        title="Setelan Harga"
+        description="Nilai default yang dipakai saat menetapkan harga jual produk baru - bisa di-override per produk di halaman Tetapkan Harga Jual."
+      />
 
       {error && <div className="alert alert-error">{error}</div>}
       {notice && <div className="alert alert-info">{notice}</div>}
@@ -78,7 +81,7 @@ export function PricingSettingsPage() {
         <div className="table-wrap" style={{ padding: 20, maxWidth: 460 }}>
           <form onSubmit={handleSubmit}>
             <label>
-              Target margin default (%)
+              Target Margin Default (%)
               <input
                 type="number"
                 step="any"
@@ -87,7 +90,7 @@ export function PricingSettingsPage() {
               />
             </label>
             <label>
-              PPN default (%)
+              PPN Default (%)
               <input
                 type="number"
                 step="any"
@@ -96,23 +99,26 @@ export function PricingSettingsPage() {
               />
             </label>
             <label>
-              Margin minimum (%)
+              Margin Minimum (%)
               <input
                 type="number"
                 step="any"
                 value={form.minMarginPct}
                 onChange={(e) => setForm({ ...form, minMarginPct: e.target.value })}
               />
+              <span className="field-hint">
+                Kalau margin produk di bawah angka ini, akan ditandai "di bawah minimum" di Dashboard.
+              </span>
             </label>
             <label>
-              Pembulatan
+              Pembulatan Harga
               <select
                 value={form.roundingRule}
                 onChange={(e) => setForm({ ...form, roundingRule: e.target.value as RoundingRule })}
               >
                 {ROUNDING_RULES.map((r) => (
                   <option key={r} value={r}>
-                    {r}
+                    {roundingRuleLabel(r)}
                   </option>
                 ))}
               </select>

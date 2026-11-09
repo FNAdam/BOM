@@ -3,6 +3,8 @@ import { itemsApi } from '../api/items';
 import { bomsApi } from '../api/boms';
 import { mrpApi } from '../api/mrp';
 import type { ItemDto, MrpLineDto, MrpResultDto } from '../api/types';
+import { PageHeader } from '../components/PageHeader';
+import { itemTypeLabel } from '../labels';
 
 const PRODUCT_TYPES = new Set(['SemiFinished', 'FinishedGood']);
 
@@ -100,12 +102,15 @@ export function MrpPage() {
 
   return (
     <div>
-      <div className="page-header">
-        <h1>MRP / Procurement</h1>
-        <button type="button" className="btn btn-primary" disabled={busy || loading} onClick={calculate}>
-          {busy ? 'Menghitung...' : 'Hitung MRP'}
-        </button>
-      </div>
+      <PageHeader
+        title="Rencana Belanja (MRP)"
+        description="Masukkan rencana jumlah produksi, sistem akan hitung total bahan yang perlu dibeli dan mana yang masih cukup di stok."
+        actions={
+          <button type="button" className="btn btn-primary" disabled={busy || loading} onClick={calculate}>
+            {busy ? 'Menghitung...' : 'Hitung Kebutuhan'}
+          </button>
+        }
+      />
 
       {error && <div className="alert alert-error">{error}</div>}
       {loading && <p className="muted">Memuat...</p>}
@@ -113,7 +118,7 @@ export function MrpPage() {
       {!loading && (
         <>
           <div className="section-header">
-            <h2>Demand</h2>
+            <h2>Rencana Produksi</h2>
             <button type="button" className="btn btn-sm" onClick={addRow}>
               + Tambah baris
             </button>
@@ -121,15 +126,15 @@ export function MrpPage() {
 
           {products.length === 0 ? (
             <div className="alert alert-info">
-              Belum ada produk ber-BOM Active. Buat dan aktifkan BOM lebih dulu di menu BOM.
+              Belum ada produk dengan resep aktif. Buat dan aktifkan resep lebih dulu di menu Resep Produk (BOM).
             </div>
           ) : (
             <div className="table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th>Produk (SemiFinished / FinishedGood)</th>
-                    <th className="num">Qty</th>
+                    <th>Produk yang mau diproduksi</th>
+                    <th className="num">Jumlah</th>
                     <th></th>
                   </tr>
                 </thead>
@@ -187,21 +192,21 @@ export function MrpPage() {
         <>
           <div className="cost-summary" style={{ marginTop: 20 }}>
             <div className="cost-card">
-              <span className="cost-label">Baris Make</span>
+              <span className="cost-label">Perlu Diproduksi</span>
               <span className="cost-value">{makeLines.length}</span>
             </div>
             <div className="cost-card">
-              <span className="cost-label">Baris Buy</span>
+              <span className="cost-label">Perlu Dibeli</span>
               <span className="cost-value">{buyLines.length}</span>
             </div>
             <div className="cost-card cost-total">
-              <span className="cost-label">Total biaya pembelian</span>
+              <span className="cost-label">Total Biaya Pembelian</span>
               <span className="cost-value">{rupiah(result.totalPurchaseCost)}</span>
             </div>
           </div>
 
           <div className="section-header">
-            <h2>Saran Pembelian (Buy)</h2>
+            <h2>Saran Pembelian Bahan</h2>
           </div>
           {buyLines.length === 0 ? (
             <p className="muted">Tidak ada kebutuhan pembelian.</p>
@@ -210,16 +215,16 @@ export function MrpPage() {
               <table>
                 <thead>
                   <tr>
-                    <th>Item</th>
+                    <th>Bahan</th>
                     <th>Supplier</th>
-                    <th className="num">Gross</th>
-                    <th className="num">On-Hand</th>
-                    <th className="num">Net</th>
-                    <th className="num">MOQ</th>
-                    <th className="num">Saran Order</th>
+                    <th className="num">Total Kebutuhan</th>
+                    <th className="num">Stok Saat Ini</th>
+                    <th className="num">Kurang (Net)</th>
+                    <th className="num">Min. Order</th>
+                    <th className="num">Saran Qty Order</th>
                     <th className="num">Harga / satuan</th>
-                    <th className="num">Lead (hari)</th>
-                    <th className="num">Extended</th>
+                    <th className="num">Lead Time (hari)</th>
+                    <th className="num">Estimasi Biaya</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -232,7 +237,7 @@ export function MrpPage() {
           )}
 
           <div className="section-header">
-            <h2>Rencana Produksi (Make)</h2>
+            <h2>Rencana Produksi (Bahan Setengah Jadi/Produk Jadi)</h2>
           </div>
           {makeLines.length === 0 ? (
             <p className="muted">Tidak ada rencana produksi.</p>
@@ -243,9 +248,9 @@ export function MrpPage() {
                   <tr>
                     <th>Item</th>
                     <th>Tipe</th>
-                    <th className="num">Gross</th>
-                    <th className="num">On-Hand</th>
-                    <th className="num">Net (produksi)</th>
+                    <th className="num">Total Kebutuhan</th>
+                    <th className="num">Stok Saat Ini</th>
+                    <th className="num">Perlu Diproduksi</th>
                     <th>Satuan</th>
                   </tr>
                 </thead>
@@ -254,9 +259,9 @@ export function MrpPage() {
                     <tr key={line.itemId}>
                       <td>
                         {line.code} - {line.name}
-                        <span className="badge badge-active tree-tag">BOM</span>
+                        <span className="badge badge-active tree-tag">Punya resep</span>
                       </td>
-                      <td>{line.itemType}</td>
+                      <td>{itemTypeLabel(line.itemType)}</td>
                       <td className="num">{qty(line.grossQty)}</td>
                       <td className="num">{qty(line.onHandQty)}</td>
                       <td className="num">
@@ -281,7 +286,7 @@ function BuyRow({ line }: { line: MrpLineDto }) {
       <td>
         {line.code} - {line.name}
       </td>
-      <td>{line.supplierName ?? <span className="muted">std cost</span>}</td>
+      <td>{line.supplierName ?? <span className="muted">biaya standar</span>}</td>
       <td className="num">{qty(line.grossQty)}</td>
       <td className="num">{qty(line.onHandQty)}</td>
       <td className="num">{qty(line.netQty)}</td>

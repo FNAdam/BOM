@@ -21,6 +21,8 @@ import {
   type SimulatePricingRequest,
   type UpsertPackLevelDto,
 } from '../api/types';
+import { PageHeader } from '../components/PageHeader';
+import { bomStatusLabel, costBasisLabel, pricingMethodLabel, roundingRuleLabel } from '../labels';
 
 const PRODUCT_TYPES = new Set(['SemiFinished', 'FinishedGood']);
 
@@ -226,19 +228,23 @@ export function PricingPage() {
 
   return (
     <div>
-      <div className="page-header">
-        <h1>Harga Jual</h1>
-        {result && selectedId !== '' && (
-          <div className="form-actions" style={{ margin: 0 }}>
-            <button type="button" className="btn" disabled={busy} onClick={() => void savePriceList(false)}>
-              Simpan sebagai Price List
-            </button>
-            <button type="button" className="btn btn-primary" disabled={busy} onClick={() => void savePriceList(true)}>
-              Simpan &amp; Aktifkan
-            </button>
-          </div>
-        )}
-      </div>
+      <PageHeader
+        title="Tetapkan Harga Jual"
+        description="Hitung harga jual dari biaya produksi + margin yang diinginkan, termasuk PPN dan harga per kemasan (botol/pack/karton)."
+        actions={
+          result &&
+          selectedId !== '' && (
+            <div className="form-actions" style={{ margin: 0 }}>
+              <button type="button" className="btn" disabled={busy} onClick={() => void savePriceList(false)}>
+                Simpan sebagai Draf
+              </button>
+              <button type="button" className="btn btn-primary" disabled={busy} onClick={() => void savePriceList(true)}>
+                Simpan &amp; Aktifkan
+              </button>
+            </div>
+          )
+        }
+      />
 
       {error && <div className="alert alert-error">{error}</div>}
       {notice && <div className="alert alert-info">{notice}</div>}
@@ -261,7 +267,7 @@ export function PricingPage() {
           <select value={costBasis} onChange={(e) => setCostBasis(e.target.value as CostBasis)}>
             {COST_BASES.map((b) => (
               <option key={b} value={b}>
-                {b === 'Standard' ? 'Biaya standar' : 'COGS terakhir'}
+                {costBasisLabel(b)}
               </option>
             ))}
           </select>
@@ -287,27 +293,28 @@ export function PricingPage() {
               </div>
               <div className="form-grid">
                 <label>
-                  Metode
+                  Metode Hitung Harga
                   <select value={method} onChange={(e) => setMethod(e.target.value as PricingMethod)}>
                     {PRICING_METHODS.map((m) => (
                       <option key={m} value={m}>
-                        {m}
+                        {pricingMethodLabel(m)}
                       </option>
                     ))}
                   </select>
                 </label>
                 <label>
-                  Target margin (%)
+                  Target Margin (%)
                   <input
                     type="number"
                     value={targetPct}
                     disabled={method === 'Manual'}
                     onChange={(e) => setTargetPct(e.target.value)}
                   />
+                  <span className="field-hint">Berapa persen untung yang diinginkan dari harga jual.</span>
                 </label>
                 {method === 'Manual' && (
                   <label>
-                    Harga dasar manual
+                    Harga Dasar (ditentukan sendiri)
                     <input
                       type="number"
                       value={manualBasePrice}
@@ -320,28 +327,35 @@ export function PricingPage() {
                   <input type="number" value={taxPct} onChange={(e) => setTaxPct(e.target.value)} />
                 </label>
                 <label>
-                  Pembulatan
+                  Pembulatan Harga
                   <select value={roundingRule} onChange={(e) => setRoundingRule(e.target.value as RoundingRule)}>
                     {ROUNDING_RULES.map((r) => (
                       <option key={r} value={r}>
-                        {r}
+                        {roundingRuleLabel(r)}
                       </option>
                     ))}
                   </select>
                 </label>
                 <label>
-                  Floor cost (opsional)
+                  Harga Minimum / Floor (opsional)
                   <input type="number" value={floorCost} onChange={(e) => setFloorCost(e.target.value)} />
+                  <span className="field-hint">Harga jual tidak akan pernah disarankan di bawah angka ini.</span>
                 </label>
                 <label>
-                  Biaya tetap / periode
+                  Biaya Tetap / Bulan (untuk break-even)
                   <input type="number" value={fixedCost} onChange={(e) => setFixedCost(e.target.value)} />
+                  <span className="field-hint">
+                    Mis. sewa tempat, gaji tetap - dipakai untuk hitung target jual bulanan (break-even).
+                  </span>
                 </label>
               </div>
 
               <div className="section-header">
-                <h2>Margin per kanal</h2>
+                <h2>Margin Tambahan per Kanal Penjualan</h2>
               </div>
+              <p className="muted" style={{ marginTop: -6 }}>
+                Kosongkan untuk pakai margin default kanal tersebut (lihat menu Kanal Penjualan).
+              </p>
               <div className="form-grid">
                 {channels.map((c) => (
                   <label key={c.id}>
@@ -359,7 +373,7 @@ export function PricingPage() {
               {packLevels.length > 0 && (
                 <>
                   <div className="section-header">
-                    <h2>Diskon per kemasan</h2>
+                    <h2>Diskon per Kemasan</h2>
                   </div>
                   <div className="form-grid">
                     {packLevels.map((p) => (
@@ -383,11 +397,11 @@ export function PricingPage() {
                 <>
                   <div className="cost-summary">
                     <div className="cost-card">
-                      <span className="cost-label">Biaya / botol</span>
+                      <span className="cost-label">Biaya Produksi / satuan dasar</span>
                       <span className="cost-value">{rupiah(result.cost)}</span>
                     </div>
                     <div className="cost-card cost-total">
-                      <span className="cost-label">Harga dasar</span>
+                      <span className="cost-label">Harga Dasar (ex-factory)</span>
                       <span className="cost-value">{rupiah(result.basePrice)}</span>
                     </div>
                     <div className="cost-card">
@@ -395,18 +409,19 @@ export function PricingPage() {
                       <span className="cost-value">{pct(result.marginPct)}</span>
                     </div>
                     <div className="cost-card">
-                      <span className="cost-label">Kontribusi / botol</span>
+                      <span className="cost-label">Untung / satuan dasar</span>
                       <span className="cost-value">{rupiah(result.contributionMargin)}</span>
                     </div>
                     <div className="cost-card">
-                      <span className="cost-label">Break-even (unit)</span>
+                      <span className="cost-label">Target Jual Balik Modal (unit/bulan)</span>
                       <span className="cost-value">{result.breakEvenQty != null ? rupiah(result.breakEvenQty) : '-'}</span>
                     </div>
                   </div>
 
                   {result.floorViolation && (
                     <div className="alert alert-error">
-                      Peringatan floor: harga dasar di bawah floor cost atau margin di bawah minimum.
+                      Peringatan: harga dasar di bawah harga minimum (floor), atau margin di bawah batas minimum
+                      yang ditentukan di Setelan Harga.
                     </div>
                   )}
 
@@ -415,7 +430,7 @@ export function PricingPage() {
                       <thead>
                         <tr>
                           <th>Kemasan</th>
-                          <th className="num">Qty/base</th>
+                          <th className="num">Isi / satuan dasar</th>
                           {result.tiers.map((t) => (
                             <th key={t} className="num">
                               {t}
@@ -450,10 +465,10 @@ export function PricingPage() {
           </div>
 
           <div className="section-header">
-            <h2>Daftar Price List</h2>
+            <h2>Riwayat Harga Tersimpan</h2>
           </div>
           {priceLists.length === 0 ? (
-            <p className="muted">Belum ada price list tersimpan untuk produk ini.</p>
+            <p className="muted">Belum ada harga tersimpan untuk produk ini.</p>
           ) : (
             <div className="table-wrap">
               <table>
@@ -472,11 +487,11 @@ export function PricingPage() {
                   {priceLists.map((pl) => (
                     <tr key={pl.id}>
                       <td>{pl.id}</td>
-                      <td>{pl.pricingMethod}</td>
-                      <td>{pl.costBasis}</td>
+                      <td>{pricingMethodLabel(pl.pricingMethod)}</td>
+                      <td>{costBasisLabel(pl.costBasis)}</td>
                       <td className="num">{pct(pl.targetPercent)}</td>
                       <td>
-                        <span className={`badge badge-${pl.status.toLowerCase()}`}>{pl.status}</span>
+                        <span className={`badge badge-${pl.status.toLowerCase()}`}>{bomStatusLabel(pl.status)}</span>
                       </td>
                       <td className="num">{pl.lineCount}</td>
                       <td className="actions">
@@ -596,7 +611,7 @@ function PackLevelsManager({
             <thead>
               <tr>
                 <th>Nama</th>
-                <th className="num">Qty/base</th>
+                <th className="num">Isi / satuan dasar</th>
                 <th>Default</th>
                 <th></th>
               </tr>
@@ -628,7 +643,7 @@ function PackLevelsManager({
           <input value={form.name} maxLength={40} required onChange={(e) => setForm({ ...form, name: e.target.value })} />
         </label>
         <label>
-          Qty per base
+          Isi per Satuan Dasar
           <input
             type="number"
             step="any"
@@ -637,6 +652,7 @@ function PackLevelsManager({
             required
             onChange={(e) => setForm({ ...form, qtyPerBase: Number(e.target.value) })}
           />
+          <span className="field-hint">Mis. kalau 1 Pack isi 12 botol, isi 12.</span>
         </label>
         <label>
           Barcode (opsional)

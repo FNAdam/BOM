@@ -8,6 +8,7 @@ import type {
   CostSnapshotDto,
   ItemDto,
 } from '../api/types';
+import { PageHeader } from '../components/PageHeader';
 
 const PRODUCT_TYPES = new Set(['SemiFinished', 'FinishedGood']);
 
@@ -33,7 +34,7 @@ function CostRow({ line, depth }: { line: CostLineDto; depth: number }) {
           <span style={{ paddingLeft: `${depth * 20}px` }}>
             {depth > 0 && <span className="tree-branch">└ </span>}
             {line.code} - {line.name}
-            {line.hasBom && <span className="badge badge-active tree-tag">BOM</span>}
+            {line.hasBom && <span className="badge badge-active tree-tag">Punya resep</span>}
           </span>
         </td>
         <td className="num">
@@ -131,25 +132,28 @@ export function CostingPage() {
 
   return (
     <div>
-      <div className="page-header">
-        <h1>Costing Standar</h1>
-        {breakdown && (
-          <button type="button" className="btn btn-primary" disabled={busy} onClick={saveSnapshot}>
-            {busy ? 'Memproses...' : 'Simpan snapshot'}
-          </button>
-        )}
-      </div>
+      <PageHeader
+        title="Biaya Produksi (Costing)"
+        description="Hitung berapa biaya membuat 1 satuan produk, dirinci sampai ke tiap bahan di dalam resepnya."
+        actions={
+          breakdown && (
+            <button type="button" className="btn btn-primary" disabled={busy} onClick={saveSnapshot}>
+              {busy ? 'Memproses...' : '💾 Simpan sebagai catatan biaya'}
+            </button>
+          )
+        }
+      />
 
       <div className="filters">
         <label className="filter">
-          Item
+          Pilih Produk / Bahan
           <select
             value={selectedId}
             onChange={(e) => void selectItem(e.target.value ? Number(e.target.value) : '')}
           >
             <option value="">-- pilih item --</option>
             {withBom.length > 0 && (
-              <optgroup label="Produk (BOM Active)">
+              <optgroup label="Produk (punya resep aktif)">
                 {withBom.map((i) => (
                   <option key={i.id} value={i.id}>
                     {i.code} - {i.name}
@@ -157,7 +161,7 @@ export function CostingPage() {
                 ))}
               </optgroup>
             )}
-            <optgroup label="Item lain">
+            <optgroup label="Bahan/item lain">
               {others.map((i) => (
                 <option key={i.id} value={i.id}>
                   {i.code} - {i.name}
@@ -175,11 +179,11 @@ export function CostingPage() {
         <>
           <div className="cost-summary">
             <div className="cost-card">
-              <span className="cost-label">Material</span>
+              <span className="cost-label">Biaya Bahan</span>
               <span className="cost-value">{rupiah(breakdown.materialCost)}</span>
             </div>
             <div className="cost-card">
-              <span className="cost-label">Labor</span>
+              <span className="cost-label">Tenaga Kerja</span>
               <span className="cost-value">{rupiah(breakdown.laborCost)}</span>
             </div>
             <div className="cost-card">
@@ -187,28 +191,28 @@ export function CostingPage() {
               <span className="cost-value">{rupiah(breakdown.overheadCost)}</span>
             </div>
             <div className="cost-card cost-total">
-              <span className="cost-label">Total / {breakdown.outputUomCode}</span>
+              <span className="cost-label">Total Biaya / {breakdown.outputUomCode}</span>
               <span className="cost-value">{rupiah(breakdown.totalCost)}</span>
             </div>
           </div>
 
           {breakdown.isPurchased ? (
             <div className="alert alert-info">
-              Item dibeli (tanpa BOM Active): biaya diambil dari harga supplier preferred atau
-              Standard Material Cost, per {breakdown.outputUomCode}.
+              Item ini dibeli langsung (tidak punya resep aktif): biaya diambil dari harga supplier utama, atau
+              Biaya Standar kalau belum ada harga supplier, per {breakdown.outputUomCode}.
             </div>
           ) : breakdown.components.length === 0 ? (
-            <p className="muted">BOM tidak memiliki komponen.</p>
+            <p className="muted">Resep ini belum punya bahan.</p>
           ) : (
             <div className="table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th>Komponen</th>
-                    <th className="num">Qty / output</th>
-                    <th className="num">Scrap</th>
+                    <th>Bahan</th>
+                    <th className="num">Takaran / hasil</th>
+                    <th className="num">Susut</th>
                     <th className="num">Biaya / satuan</th>
-                    <th className="num">Biaya / output</th>
+                    <th className="num">Biaya / hasil</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -225,22 +229,22 @@ export function CostingPage() {
       {selectedId !== '' && (
         <>
           <div className="section-header">
-            <h2>Riwayat Snapshot</h2>
+            <h2>Riwayat Biaya Tersimpan</h2>
           </div>
           {snapshots.length === 0 ? (
-            <p className="muted">Belum ada snapshot untuk item ini.</p>
+            <p className="muted">Belum ada catatan biaya tersimpan untuk item ini.</p>
           ) : (
             <div className="table-wrap">
               <table>
                 <thead>
                   <tr>
                     <th>Tanggal</th>
-                    <th className="num">Material</th>
-                    <th className="num">Labor</th>
+                    <th className="num">Bahan</th>
+                    <th className="num">Tenaga Kerja</th>
                     <th className="num">Overhead</th>
                     <th className="num">Total</th>
                     <th>Satuan</th>
-                    <th>BOM</th>
+                    <th>Versi Resep</th>
                   </tr>
                 </thead>
                 <tbody>
