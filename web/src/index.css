@@ -167,8 +167,17 @@ nav {
 
 .logo-badge img {
   display: block;
-  height: 30px;
+  height: 56px;
   width: auto;
+}
+
+/* .brand adalah flex column; tanpa ini badge putihnya melebar penuh (stretch default). */
+.brand .logo-badge {
+  align-self: flex-start;
+}
+
+.mobile-topbar .logo-badge img {
+  height: 28px;
 }
 
 .login-logo {
@@ -804,9 +813,12 @@ label.checkbox input {
     padding: 16px;
   }
 
-  /* Input < 16px bikin Safari iOS auto-zoom saat fokus - paksa minimal 16px di mobile. */
+  /* Input < 16px bikin Safari iOS auto-zoom saat fokus - paksa minimal 16px di mobile.
+     Termasuk override selector lebih spesifik punya tabel editor BOM (field paling padat). */
   input,
-  select {
+  select,
+  .editor-fieldset table input,
+  .editor-fieldset table select {
     font-size: 16px;
   }
 
@@ -822,8 +834,8 @@ label.checkbox input {
   .modal {
     max-width: none;
     width: 100%;
-    height: 100dvh;
     height: 100vh;
+    height: 100dvh;
     max-height: none;
     border-radius: 0;
   }
