@@ -1,20 +1,26 @@
 :root {
-  --bg: #f4f6f9;
+  --bg: #f6f5f3;
   --surface: #ffffff;
-  --border: #e2e6ec;
-  --text: #1f2733;
-  --muted: #6b7684;
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
+  --border: #e8e4de;
+  --text: #221b15;
+  --muted: #7a7067;
+  --primary: #a85a2a;
+  --primary-hover: #8c4a22;
+  --primary-soft: #fbeee3;
   --danger: #dc2626;
   --danger-hover: #b91c1c;
-  --sidebar-bg: #1e293b;
-  --sidebar-text: #cbd5e1;
-  --radius: 8px;
+  --sidebar-bg: #221b15;
+  --sidebar-bg-end: #2e2319;
+  --sidebar-text: #d8cfc6;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow-sm: 0 1px 2px rgba(34, 27, 21, 0.06), 0 1px 1px rgba(34, 27, 21, 0.04);
+  --shadow-md: 0 8px 24px rgba(34, 27, 21, 0.08), 0 2px 6px rgba(34, 27, 21, 0.05);
 
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color: var(--text);
   background: var(--bg);
+  -webkit-font-smoothing: antialiased;
 }
 
 * {
@@ -28,7 +34,9 @@ body {
 }
 
 h1 {
-  font-size: 1.4rem;
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   margin: 0;
 }
 
@@ -40,7 +48,7 @@ h1 {
 }
 
 .sidebar {
-  background: var(--sidebar-bg);
+  background: linear-gradient(180deg, var(--sidebar-bg) 0%, var(--sidebar-bg-end) 100%);
   color: var(--sidebar-text);
   padding: 20px 14px;
   display: flex;
@@ -64,7 +72,7 @@ h1 {
 
 .brand-sub {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: #a89a8c;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -86,7 +94,7 @@ nav {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  color: #64748b;
+  color: #8a7c6e;
   padding: 0 12px 2px;
 }
 
@@ -94,12 +102,12 @@ nav {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
-  border-radius: var(--radius);
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
   color: var(--sidebar-text);
   text-decoration: none;
   font-size: 0.95rem;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
 }
 
 .nav-icon {
@@ -110,13 +118,14 @@ nav {
 }
 
 .nav-link:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.07);
   color: #fff;
 }
 
 .nav-link.active {
   background: var(--primary);
   color: #fff;
+  box-shadow: 0 2px 8px rgba(168, 90, 42, 0.45);
 }
 
 .content {
@@ -195,6 +204,7 @@ nav {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 18px 20px;
+  box-shadow: var(--shadow-sm);
 }
 
 .getting-started ol {
@@ -225,6 +235,7 @@ nav {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow-x: auto;
+  box-shadow: var(--shadow-sm);
 }
 
 table {
@@ -236,7 +247,7 @@ table {
 thead th {
   text-align: left;
   padding: 12px 14px;
-  background: #f8fafc;
+  background: #faf8f6;
   border-bottom: 1px solid var(--border);
   color: var(--muted);
   font-weight: 600;
@@ -252,8 +263,12 @@ tbody tr:last-child td {
   border-bottom: none;
 }
 
+tbody tr {
+  transition: background 0.1s ease;
+}
+
 tbody tr:hover {
-  background: #f8fafc;
+  background: #faf8f6;
 }
 
 .num {
@@ -272,19 +287,26 @@ td.actions {
   background: var(--surface);
   color: var(--text);
   padding: 8px 14px;
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 0.9rem;
-  transition: background 0.15s, border-color 0.15s;
+  font-weight: 500;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
 }
 
 .btn:hover {
-  background: #f1f5f9;
+  background: #faf8f6;
+  border-color: #d8d2c9;
+}
+
+.btn:active {
+  transform: translateY(1px);
 }
 
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 
 .btn-sm {
@@ -296,10 +318,13 @@ td.actions {
   background: var(--primary);
   border-color: var(--primary);
   color: #fff;
+  box-shadow: 0 1px 2px rgba(168, 90, 42, 0.25);
 }
 
 .btn-primary:hover {
   background: var(--primary-hover);
+  border-color: var(--primary-hover);
+  box-shadow: 0 4px 12px rgba(168, 90, 42, 0.3);
 }
 
 .btn-danger {
@@ -310,6 +335,7 @@ td.actions {
 
 .btn-danger:hover {
   background: var(--danger);
+  border-color: var(--danger);
   color: #fff;
 }
 
@@ -350,7 +376,7 @@ td.actions {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.5);
+  background: rgba(34, 27, 21, 0.5);
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -361,13 +387,13 @@ td.actions {
 
 .modal {
   background: var(--surface);
-  border-radius: var(--radius);
+  border-radius: 16px;
   width: 100%;
   max-width: 820px;
   max-height: calc(100vh - 64px);
   display: flex;
   flex-direction: column;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 50px rgba(34, 27, 21, 0.25);
 }
 
 .modal-header {
@@ -413,15 +439,17 @@ select {
   font: inherit;
   padding: 8px 10px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: #fff;
   color: var(--text);
   font-weight: 400;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 input:focus,
 select:focus {
-  outline: 2px solid rgba(37, 99, 235, 0.35);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(168, 90, 42, 0.28);
   border-color: var(--primary);
 }
 
@@ -572,11 +600,20 @@ label.checkbox input {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+@media (hover: hover) {
+  .cost-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
 }
 
 .cost-card.cost-total {
   border-color: var(--primary);
-  background: #eff6ff;
+  background: var(--primary-soft);
 }
 
 .cost-label {
@@ -716,18 +753,18 @@ label.checkbox input {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg);
+  background: radial-gradient(circle at 50% 0%, var(--primary-soft) 0%, var(--bg) 60%);
   padding: 16px;
 }
 
 .login-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 28px;
+  border-radius: 16px;
+  padding: 32px 28px;
   width: 100%;
   max-width: 360px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
 }
 
 .login-error {
@@ -751,6 +788,7 @@ label.checkbox input {
 
 .sidebar-footer .btn:hover {
   background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.3);
   color: #fff;
 }
 
@@ -805,7 +843,7 @@ label.checkbox input {
     display: block;
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.5);
+    background: rgba(34, 27, 21, 0.5);
     z-index: 50;
   }
 
