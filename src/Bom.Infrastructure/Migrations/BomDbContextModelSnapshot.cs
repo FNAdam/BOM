@@ -1075,6 +1075,111 @@ namespace Bom.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Bom.Domain.Entities.SalesOrder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CustomerName")
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("customer_name");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("notes");
+
+                    b.Property<DateOnly>("OrderDate")
+                        .HasColumnType("date")
+                        .HasColumnName("order_date");
+
+                    b.Property<string>("OrderNo")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("order_no");
+
+                    b.Property<int?>("SalesChannelId")
+                        .HasColumnType("integer")
+                        .HasColumnName("sales_channel_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<decimal>("TaxPercent")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("tax_percent");
+
+                    b.HasKey("Id")
+                        .HasName("pk_sales_orders");
+
+                    b.HasIndex("OrderNo")
+                        .IsUnique()
+                        .HasDatabaseName("ix_sales_orders_order_no");
+
+                    b.HasIndex("SalesChannelId")
+                        .HasDatabaseName("ix_sales_orders_sales_channel_id");
+
+                    b.ToTable("sales_orders", (string)null);
+                });
+
+            modelBuilder.Entity("Bom.Domain.Entities.SalesOrderLine", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("PackLevelId")
+                        .HasColumnType("integer")
+                        .HasColumnName("pack_level_id");
+
+                    b.Property<int>("ProductItemId")
+                        .HasColumnType("integer")
+                        .HasColumnName("product_item_id");
+
+                    b.Property<decimal>("Qty")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("qty");
+
+                    b.Property<int>("SalesOrderId")
+                        .HasColumnType("integer")
+                        .HasColumnName("sales_order_id");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("unit_price");
+
+                    b.HasKey("Id")
+                        .HasName("pk_sales_order_lines");
+
+                    b.HasIndex("PackLevelId")
+                        .HasDatabaseName("ix_sales_order_lines_pack_level_id");
+
+                    b.HasIndex("ProductItemId")
+                        .HasDatabaseName("ix_sales_order_lines_product_item_id");
+
+                    b.HasIndex("SalesOrderId")
+                        .HasDatabaseName("ix_sales_order_lines_sales_order_id");
+
+                    b.ToTable("sales_order_lines", (string)null);
+                });
+
             modelBuilder.Entity("Bom.Domain.Entities.StockMovement", b =>
                 {
                     b.Property<int>("Id")
@@ -1604,6 +1709,46 @@ namespace Bom.Infrastructure.Migrations
                     b.Navigation("Uom");
                 });
 
+            modelBuilder.Entity("Bom.Domain.Entities.SalesOrder", b =>
+                {
+                    b.HasOne("Bom.Domain.Entities.SalesChannel", "SalesChannel")
+                        .WithMany()
+                        .HasForeignKey("SalesChannelId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_sales_orders_sales_channels_sales_channel_id");
+
+                    b.Navigation("SalesChannel");
+                });
+
+            modelBuilder.Entity("Bom.Domain.Entities.SalesOrderLine", b =>
+                {
+                    b.HasOne("Bom.Domain.Entities.PackLevel", "PackLevel")
+                        .WithMany()
+                        .HasForeignKey("PackLevelId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_sales_order_lines_pack_levels_pack_level_id");
+
+                    b.HasOne("Bom.Domain.Entities.Item", "ProductItem")
+                        .WithMany()
+                        .HasForeignKey("ProductItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_sales_order_lines_items_product_item_id");
+
+                    b.HasOne("Bom.Domain.Entities.SalesOrder", "SalesOrder")
+                        .WithMany("Lines")
+                        .HasForeignKey("SalesOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_sales_order_lines_sales_orders_sales_order_id");
+
+                    b.Navigation("PackLevel");
+
+                    b.Navigation("ProductItem");
+
+                    b.Navigation("SalesOrder");
+                });
+
             modelBuilder.Entity("Bom.Domain.Entities.StockMovement", b =>
                 {
                     b.HasOne("Bom.Domain.Entities.Item", "Item")
@@ -1665,6 +1810,11 @@ namespace Bom.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("Bom.Domain.Entities.PurchaseOrder", b =>
+                {
+                    b.Navigation("Lines");
+                });
+
+            modelBuilder.Entity("Bom.Domain.Entities.SalesOrder", b =>
                 {
                     b.Navigation("Lines");
                 });

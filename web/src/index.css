@@ -513,6 +513,85 @@ label.checkbox input {
   border-color: #fde3b8;
 }
 
+/* --- Struk / receipt --- */
+.receipt-sheet {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 28px;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.receipt-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--text);
+  margin-bottom: 16px;
+}
+
+.receipt-header-info {
+  text-align: right;
+  font-size: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.receipt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  margin-bottom: 16px;
+}
+
+.receipt-table th {
+  text-align: left;
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.receipt-table td {
+  padding: 6px 4px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.receipt-totals {
+  margin-left: auto;
+  width: 100%;
+  max-width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.receipt-totals > div {
+  display: flex;
+  justify-content: space-between;
+}
+
+.receipt-grand-total {
+  font-size: 1.1rem;
+  font-weight: 700;
+  border-top: 2px solid var(--text);
+  padding-top: 8px;
+  margin-top: 4px;
+}
+
+.receipt-footer {
+  text-align: center;
+  margin-top: 24px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
 .filters {
   display: flex;
   gap: 16px;
@@ -882,5 +961,30 @@ label.checkbox input {
     height: 100dvh;
     max-height: none;
     border-radius: 0;
+  }
+}
+
+/* Diletakkan paling akhir file (menang di luar kondisi lebar) dan menata ulang .app-shell/
+   .content sendiri, supaya tidak ketiban aturan mobile (yang cuma aktif <=720px - kertas cetak
+   standar/landscape/margin "None" seringkali TIDAK masuk kondisi itu). */
+@media print {
+  .sidebar,
+  .mobile-topbar,
+  .nav-overlay,
+  .no-print {
+    display: none !important;
+  }
+  .app-shell {
+    display: block;
+    min-height: 0;
+  }
+  .content {
+    padding: 0;
+    overflow: visible;
+  }
+  .receipt-sheet {
+    box-shadow: none;
+    border: none;
+    max-width: none;
   }
 }

@@ -21,6 +21,8 @@ import { PricingPage } from './pages/PricingPage';
 import { SalesChannelsPage } from './pages/SalesChannelsPage';
 import { PricingSettingsPage } from './pages/PricingSettingsPage';
 import { PurchaseOrdersPage } from './pages/PurchaseOrdersPage';
+import { SalesOrdersPage } from './pages/SalesOrdersPage';
+import { ReceiptPage } from './pages/ReceiptPage';
 
 // Dikelompokkan mengikuti alur kerja asli (data dasar -> resep -> biaya -> produksi -> harga
 // jual), bukan abjad - supaya menu kelihatan seperti langkah, bukan daftar fitur acak.
@@ -60,6 +62,7 @@ const navGroups = [
   {
     group: '5. Harga Jual',
     items: [
+      { to: '/sales-orders', label: 'Pesanan Penjualan', icon: '🧾' },
       { to: '/pricing', label: 'Tetapkan Harga Jual', icon: '🏷️' },
       { to: '/channels', label: 'Kanal Penjualan', icon: '🧭' },
       { to: '/pricing-settings', label: 'Setelan Harga', icon: '⚙️' },
@@ -140,6 +143,8 @@ function App() {
             <Route path="/costing" element={<CostingPage />} />
             <Route path="/mrp" element={<MrpPage />} />
             <Route path="/purchase-orders" element={<PurchaseOrdersPage />} />
+            <Route path="/sales-orders" element={<SalesOrdersPage />} />
+            <Route path="/sales-orders/:id/receipt" element={<ReceiptPage />} />
             <Route path="/production" element={<ProductionPage />} />
             <Route path="/inventory" element={<InventoryPage />} />
             <Route path="/pricing" element={<PricingPage />} />

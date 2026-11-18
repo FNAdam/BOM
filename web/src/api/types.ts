@@ -325,7 +325,8 @@ export type StockMovementType =
   | 'Issue'
   | 'ProductionIssue'
   | 'ProductionReceipt'
-  | 'Adjustment';
+  | 'Adjustment'
+  | 'Sale';
 
 export interface ProductionConsumptionDto {
   id: number;
@@ -673,6 +674,78 @@ export interface ReceivePurchaseOrderLineDto {
 
 export interface ReceivePurchaseOrderDto {
   lines: ReceivePurchaseOrderLineDto[];
+}
+
+// --- Sales Order & Struk (Fase 8b) ---
+export type SalesOrderStatus = 'Draft' | 'Completed' | 'Cancelled';
+export const SALES_ORDER_STATUSES: SalesOrderStatus[] = ['Draft', 'Completed', 'Cancelled'];
+
+export interface SalesOrderLineDto {
+  id: number;
+  productItemId: number;
+  productCode: string;
+  productName: string;
+  packLevelId: number | null;
+  packLevelName: string | null;
+  baseUomCode: string;
+  qty: number;
+  unitPrice: number;
+  lineTotal: number;
+}
+
+export interface SalesOrderDto {
+  id: number;
+  orderNo: string;
+  salesChannelId: number | null;
+  salesChannelName: string | null;
+  customerName: string | null;
+  status: SalesOrderStatus;
+  orderDate: string;
+  taxPercent: number;
+  notes: string | null;
+  lines: SalesOrderLineDto[];
+}
+
+export interface SalesOrderListDto {
+  id: number;
+  orderNo: string;
+  customerName: string | null;
+  salesChannelId: number | null;
+  salesChannelName: string | null;
+  status: SalesOrderStatus;
+  orderDate: string;
+  lineCount: number;
+  grandTotal: number;
+}
+
+export interface UpsertSalesOrderLineDto {
+  productItemId: number;
+  packLevelId: number | null;
+  qty: number;
+  unitPrice: number;
+}
+
+export interface UpsertSalesOrderDto {
+  orderNo: string;
+  salesChannelId: number | null;
+  customerName: string | null;
+  orderDate: string;
+  taxPercent: number;
+  notes: string | null;
+  lines: UpsertSalesOrderLineDto[];
+}
+
+export interface SalesReceiptDto {
+  id: number;
+  orderNo: string;
+  customerName: string | null;
+  salesChannelName: string | null;
+  orderDate: string;
+  subtotal: number;
+  taxPercent: number;
+  taxAmount: number;
+  grandTotal: number;
+  lines: SalesOrderLineDto[];
 }
 
 // --- Dashboard (Fase 7) ---

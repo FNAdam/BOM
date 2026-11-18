@@ -31,13 +31,20 @@ public class InventoryLedgerService : IInventoryLedgerService
             case StockMovementType.ProductionReceipt:
             {
                 var newQty = balance.QtyOnHand + qty;
-                if (newQty > 0)
+                // Saldo <= 0 (mis. habis terjual lebih dulu / backflush negatif) bikin rumus
+                // rata-rata tertimbang biasa salah (komponen "qty negatif * avg lama" meracuni
+                // hasil) - kalau saldo sebelumnya bukan stok riil positif, mulai lagi dari harga
+                // terima ini saja.
+                if (balance.QtyOnHand <= 0)
+                    balance.AverageCost = unitCost;
+                else if (newQty > 0)
                     balance.AverageCost = (balance.QtyOnHand * balance.AverageCost + qty * unitCost) / newQty;
                 balance.QtyOnHand = newQty;
                 break;
             }
             case StockMovementType.Issue:
             case StockMovementType.ProductionIssue:
+            case StockMovementType.Sale:
             {
                 recordedUnitCost = balance.AverageCost; // keluaran memakai rata-rata saat ini
                 balance.QtyOnHand -= qty;               // rata-rata tetap
@@ -46,13 +53,17 @@ public class InventoryLedgerService : IInventoryLedgerService
             case StockMovementType.Adjustment:
             {
                 var newQty = balance.QtyOnHand + qty; // qty boleh negatif (delta)
-                if (qty > 0 && newQty > 0)
+                if (qty > 0 && balance.QtyOnHand <= 0)
+                    balance.AverageCost = unitCost;
+                else if (qty > 0 && newQty > 0)
                     balance.AverageCost = (balance.QtyOnHand * balance.AverageCost + qty * unitCost) / newQty;
                 else
                     recordedUnitCost = balance.AverageCost;
                 balance.QtyOnHand = newQty;
                 break;
             }
+            default:
+                throw new ArgumentOutOfRangeException(nameof(type), type, "Jenis pergerakan stok tidak dikenali.");
         }
 
         _db.StockMovements.Add(new StockMovement

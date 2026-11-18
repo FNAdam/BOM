@@ -34,6 +34,7 @@ builder.Services.AddScoped<IPricingService, PricingService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
+builder.Services.AddScoped<ISalesOrderService, SalesOrderService>();
 
 // Login JWT bearer: semua endpoint butuh token valid secara default (global AuthorizeFilter di
 // bawah), kecuali yang ditandai [AllowAnonymous] (POST /api/auth/login).
@@ -95,6 +96,17 @@ var app = builder.Build();
 // serta host startup tidak bergantung pada koneksi database.
 
 // --- Middleware ---
+
+// Paling awal (sebelum UseCors) supaya exception tak tertangani tetap dapat header CORS -
+// tanpa ini, 500 mentah dari Kestrel bikin browser salah lapor "blocked by CORS policy" padahal
+// penyebab aslinya exception di server (mis. tabel migration belum di-apply).
+app.UseExceptionHandler(a => a.Run(async ctx =>
+{
+    ctx.Response.StatusCode = 500;
+    ctx.Response.ContentType = "application/json";
+    await ctx.Response.WriteAsJsonAsync(new { message = "Terjadi kesalahan di server." });
+}));
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

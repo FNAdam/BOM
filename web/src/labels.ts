@@ -43,6 +43,7 @@ export const stockMovementTypeLabel = makeLabeler({
   ProductionIssue: 'Dipakai Produksi',
   ProductionReceipt: 'Hasil Produksi',
   Adjustment: 'Penyesuaian',
+  Sale: 'Terjual',
 });
 
 export const pricingMethodLabel = makeLabeler({
@@ -70,5 +71,11 @@ export const purchaseOrderStatusLabel = makeLabeler({
   Sent: 'Dikirim',
   PartiallyReceived: 'Diterima Sebagian',
   Received: 'Diterima Lunas',
+  Cancelled: 'Dibatalkan',
+});
+
+export const salesOrderStatusLabel = makeLabeler({
+  Draft: 'Draf',
+  Completed: 'Selesai',
   Cancelled: 'Dibatalkan',
 });

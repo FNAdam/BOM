@@ -24,5 +24,8 @@ public enum StockMovementType
     ProductionReceipt,
 
     /// <summary>Penyesuaian saldo (stock opname / koreksi).</summary>
-    Adjustment
+    Adjustment,
+
+    /// <summary>Pengeluaran produk terjual ke customer saat pesanan penjualan diselesaikan (stok keluar).</summary>
+    Sale
 }
