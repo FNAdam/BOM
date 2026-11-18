@@ -2,7 +2,9 @@
 // Base URL diambil dari VITE_API_URL, fallback ke localhost:5099.
 import { clearSession, getToken } from './auth';
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5099';
+// Buang garis miring di akhir kalau ada (mis. VITE_API_URL="https://host.com/") - tanpa ini,
+// path "/api/..." yang juga diawali garis miring jadi dobel ("https://host.com//api/...").
+const BASE_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:5099').replace(/\/+$/, '');
 
 /**
  * Ekstrak pesan error dari body respons (JSON { message } / ProblemDetails / ValidationProblem),
