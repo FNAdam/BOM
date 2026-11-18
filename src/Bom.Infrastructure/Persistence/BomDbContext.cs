@@ -35,6 +35,8 @@ public class BomDbContext : DbContext
     public DbSet<PriceList> PriceLists => Set<PriceList>();
     public DbSet<PriceListLine> PriceListLines => Set<PriceListLine>();
     public DbSet<AppUser> AppUsers => Set<AppUser>();
+    public DbSet<PurchaseOrder> PurchaseOrders => Set<PurchaseOrder>();
+    public DbSet<PurchaseOrderLine> PurchaseOrderLines => Set<PurchaseOrderLine>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

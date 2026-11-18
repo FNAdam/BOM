@@ -909,6 +909,106 @@ namespace Bom.Infrastructure.Migrations
                     b.ToTable("production_orders", (string)null);
                 });
 
+            modelBuilder.Entity("Bom.Domain.Entities.PurchaseOrder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("notes");
+
+                    b.Property<DateOnly>("OrderDate")
+                        .HasColumnType("date")
+                        .HasColumnName("order_date");
+
+                    b.Property<string>("OrderNo")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("order_no");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("integer")
+                        .HasColumnName("supplier_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_purchase_orders");
+
+                    b.HasIndex("OrderNo")
+                        .IsUnique()
+                        .HasDatabaseName("ix_purchase_orders_order_no");
+
+                    b.HasIndex("SupplierId")
+                        .HasDatabaseName("ix_purchase_orders_supplier_id");
+
+                    b.ToTable("purchase_orders", (string)null);
+                });
+
+            modelBuilder.Entity("Bom.Domain.Entities.PurchaseOrderLine", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("integer")
+                        .HasColumnName("item_id");
+
+                    b.Property<int>("PurchaseOrderId")
+                        .HasColumnType("integer")
+                        .HasColumnName("purchase_order_id");
+
+                    b.Property<decimal>("QtyOrdered")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("qty_ordered");
+
+                    b.Property<decimal>("QtyReceived")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("qty_received");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("unit_price");
+
+                    b.Property<int>("UomId")
+                        .HasColumnType("integer")
+                        .HasColumnName("uom_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_purchase_order_lines");
+
+                    b.HasIndex("ItemId")
+                        .HasDatabaseName("ix_purchase_order_lines_item_id");
+
+                    b.HasIndex("PurchaseOrderId")
+                        .HasDatabaseName("ix_purchase_order_lines_purchase_order_id");
+
+                    b.HasIndex("UomId")
+                        .HasDatabaseName("ix_purchase_order_lines_uom_id");
+
+                    b.ToTable("purchase_order_lines", (string)null);
+                });
+
             modelBuilder.Entity("Bom.Domain.Entities.SalesChannel", b =>
                 {
                     b.Property<int>("Id")
@@ -1462,6 +1562,48 @@ namespace Bom.Infrastructure.Migrations
                     b.Navigation("ProductItem");
                 });
 
+            modelBuilder.Entity("Bom.Domain.Entities.PurchaseOrder", b =>
+                {
+                    b.HasOne("Bom.Domain.Entities.Supplier", "Supplier")
+                        .WithMany()
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_purchase_orders_suppliers_supplier_id");
+
+                    b.Navigation("Supplier");
+                });
+
+            modelBuilder.Entity("Bom.Domain.Entities.PurchaseOrderLine", b =>
+                {
+                    b.HasOne("Bom.Domain.Entities.Item", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_purchase_order_lines_items_item_id");
+
+                    b.HasOne("Bom.Domain.Entities.PurchaseOrder", "PurchaseOrder")
+                        .WithMany("Lines")
+                        .HasForeignKey("PurchaseOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_purchase_order_lines_purchase_orders_purchase_order_id");
+
+                    b.HasOne("Bom.Domain.Entities.Uom", "Uom")
+                        .WithMany()
+                        .HasForeignKey("UomId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_purchase_order_lines_uoms_uom_id");
+
+                    b.Navigation("Item");
+
+                    b.Navigation("PurchaseOrder");
+
+                    b.Navigation("Uom");
+                });
+
             modelBuilder.Entity("Bom.Domain.Entities.StockMovement", b =>
                 {
                     b.HasOne("Bom.Domain.Entities.Item", "Item")
@@ -1520,6 +1662,11 @@ namespace Bom.Infrastructure.Migrations
             modelBuilder.Entity("Bom.Domain.Entities.ProductionOrder", b =>
                 {
                     b.Navigation("Consumptions");
+                });
+
+            modelBuilder.Entity("Bom.Domain.Entities.PurchaseOrder", b =>
+                {
+                    b.Navigation("Lines");
                 });
 
             modelBuilder.Entity("Bom.Domain.Entities.Supplier", b =>

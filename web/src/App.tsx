@@ -20,6 +20,7 @@ import { ProductionPage } from './pages/ProductionPage';
 import { PricingPage } from './pages/PricingPage';
 import { SalesChannelsPage } from './pages/SalesChannelsPage';
 import { PricingSettingsPage } from './pages/PricingSettingsPage';
+import { PurchaseOrdersPage } from './pages/PurchaseOrdersPage';
 
 // Dikelompokkan mengikuti alur kerja asli (data dasar -> resep -> biaya -> produksi -> harga
 // jual), bukan abjad - supaya menu kelihatan seperti langkah, bukan daftar fitur acak.
@@ -51,6 +52,7 @@ const navGroups = [
     group: '4. Produksi & Stok',
     items: [
       { to: '/mrp', label: 'Rencana Belanja (MRP)', icon: '🛒' },
+      { to: '/purchase-orders', label: 'Pesanan Pembelian', icon: '📥' },
       { to: '/production', label: 'Produksi (COGS)', icon: '🏭' },
       { to: '/inventory', label: 'Stok Barang', icon: '📊' },
     ],
@@ -137,6 +139,7 @@ function App() {
             <Route path="/boms/:id/edit" element={<BomEditorPage />} />
             <Route path="/costing" element={<CostingPage />} />
             <Route path="/mrp" element={<MrpPage />} />
+            <Route path="/purchase-orders" element={<PurchaseOrdersPage />} />
             <Route path="/production" element={<ProductionPage />} />
             <Route path="/inventory" element={<InventoryPage />} />
             <Route path="/pricing" element={<PricingPage />} />

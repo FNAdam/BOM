@@ -28,10 +28,12 @@ builder.Services.AddDbContext<BomDbContext>(options =>
 builder.Services.AddScoped<IBomService, BomService>();
 builder.Services.AddScoped<ICostingService, CostingService>();
 builder.Services.AddScoped<IMrpService, MrpService>();
+builder.Services.AddScoped<IInventoryLedgerService, InventoryLedgerService>();
 builder.Services.AddScoped<IProductionService, ProductionService>();
 builder.Services.AddScoped<IPricingService, PricingService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
 
 // Login JWT bearer: semua endpoint butuh token valid secara default (global AuthorizeFilter di
 // bawah), kecuali yang ditandai [AllowAnonymous] (POST /api/auth/login).

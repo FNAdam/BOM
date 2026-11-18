@@ -64,3 +64,11 @@ export const roundingRuleLabel = makeLabeler({
 });
 
 export const priceListStatusLabel = bomStatusLabel;
+
+export const purchaseOrderStatusLabel = makeLabeler({
+  Draft: 'Draf',
+  Sent: 'Dikirim',
+  PartiallyReceived: 'Diterima Sebagian',
+  Received: 'Diterima Lunas',
+  Cancelled: 'Dibatalkan',
+});

@@ -609,6 +609,72 @@ export interface SavePriceListRequest {
   effectiveTo?: string | null;
 }
 
+// --- Purchase Order (Fase 8) ---
+export type PurchaseOrderStatus = 'Draft' | 'Sent' | 'PartiallyReceived' | 'Received' | 'Cancelled';
+export const PURCHASE_ORDER_STATUSES: PurchaseOrderStatus[] = [
+  'Draft', 'Sent', 'PartiallyReceived', 'Received', 'Cancelled',
+];
+
+export interface PurchaseOrderLineDto {
+  id: number;
+  itemId: number;
+  itemCode: string;
+  itemName: string;
+  uomId: number;
+  uomCode: string;
+  qtyOrdered: number;
+  unitPrice: number;
+  qtyReceived: number;
+}
+
+export interface PurchaseOrderDto {
+  id: number;
+  supplierId: number;
+  supplierCode: string;
+  supplierName: string;
+  orderNo: string;
+  status: PurchaseOrderStatus;
+  orderDate: string;
+  notes: string | null;
+  lines: PurchaseOrderLineDto[];
+}
+
+export interface PurchaseOrderListDto {
+  id: number;
+  orderNo: string;
+  supplierId: number;
+  supplierCode: string;
+  supplierName: string;
+  status: PurchaseOrderStatus;
+  orderDate: string;
+  lineCount: number;
+  totalValue: number;
+}
+
+export interface UpsertPurchaseOrderLineDto {
+  itemId: number;
+  uomId: number;
+  qtyOrdered: number;
+  unitPrice: number;
+}
+
+export interface UpsertPurchaseOrderDto {
+  supplierId: number;
+  orderNo: string;
+  orderDate: string;
+  notes: string | null;
+  lines: UpsertPurchaseOrderLineDto[];
+}
+
+export interface ReceivePurchaseOrderLineDto {
+  lineId: number;
+  qtyReceiving: number;
+}
+
+export interface ReceivePurchaseOrderDto {
+  lines: ReceivePurchaseOrderLineDto[];
+}
+
 // --- Dashboard (Fase 7) ---
 export interface DashboardMarginItemDto {
   productItemId: number;

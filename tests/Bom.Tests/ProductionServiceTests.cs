@@ -101,7 +101,8 @@ public class ProductionServiceTests
         return ctx;
     }
 
-    private static ProductionService NewService(BomDbContext ctx) => new(ctx, new CostingService(ctx));
+    private static ProductionService NewService(BomDbContext ctx) =>
+        new(ctx, new CostingService(ctx), new InventoryLedgerService(ctx));
 
     private static async Task SeedBalanceAsync(BomDbContext ctx, int itemId, decimal qty, decimal avg)
     {

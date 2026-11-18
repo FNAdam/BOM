@@ -507,6 +507,12 @@ label.checkbox input {
   border-color: #fecaca;
 }
 
+.badge-pending {
+  background: #fef3e2;
+  color: #92400e;
+  border-color: #fde3b8;
+}
+
 .filters {
   display: flex;
   gap: 16px;

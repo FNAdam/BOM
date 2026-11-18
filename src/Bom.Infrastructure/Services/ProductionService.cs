@@ -34,11 +34,13 @@ public class ProductionService : IProductionService
 {
     private readonly BomDbContext _db;
     private readonly ICostingService _costing;
+    private readonly IInventoryLedgerService _ledger;
 
-    public ProductionService(BomDbContext db, ICostingService costing)
+    public ProductionService(BomDbContext db, ICostingService costing, IInventoryLedgerService ledger)
     {
         _db = db;
         _costing = costing;
+        _ledger = ledger;
     }
 
     // ---------------------------------------------------------------- Reads
@@ -233,12 +235,12 @@ public class ProductionService : IProductionService
                 continue;
             }
 
-            var movement = await ApplyMovementAsync(
+            var effectiveUnitCost = await _ledger.ApplyMovementAsync(
                 consumption.ComponentItemId, StockMovementType.ProductionIssue,
                 consumption.ActualQty, unitCost: 0m, today, "ProductionOrder", order.Id, note, ct);
 
-            consumption.ActualUnitCost = movement.UnitCost;
-            consumption.ActualCost = consumption.ActualQty * movement.UnitCost;
+            consumption.ActualUnitCost = effectiveUnitCost;
+            consumption.ActualCost = consumption.ActualQty * effectiveUnitCost;
         }
 
         // 2) COGS.
@@ -249,7 +251,7 @@ public class ProductionService : IProductionService
         var cogsUnit = cogsTotal / actualQty;
 
         // 3) Posting ProductionReceipt produk jadi pada COGS_unit.
-        await ApplyMovementAsync(
+        await _ledger.ApplyMovementAsync(
             order.ProductItemId, StockMovementType.ProductionReceipt,
             actualQty, cogsUnit, today, "ProductionOrder", order.Id, note, ct);
 
@@ -272,70 +274,6 @@ public class ProductionService : IProductionService
             throw BomServiceException.Conflict("Laporan COGS hanya tersedia untuk order yang sudah ditutup.");
 
         return await BuildCogsReportAsync(order, order.Bom!, ct);
-    }
-
-    // -------------------------------------------------- Moving-average ledger
-
-    /// <summary>
-    /// Terapkan satu pergerakan stok ke <see cref="InventoryBalance"/> (upsert) dan tulis satu
-    /// baris <see cref="StockMovement"/>. Mengembalikan movement (UnitCost efektif: untuk keluaran =
-    /// rata-rata saat ini). <paramref name="qty"/> = magnitudo (kecuali Adjustment yang boleh delta).
-    /// </summary>
-    private async Task<StockMovement> ApplyMovementAsync(
-        int itemId, StockMovementType type, decimal qty, decimal unitCost,
-        DateOnly date, string? refType, int? refId, string? notes, CancellationToken ct)
-    {
-        var balance = await _db.InventoryBalances.FirstOrDefaultAsync(b => b.ItemId == itemId, ct);
-        if (balance is null)
-        {
-            balance = new InventoryBalance { ItemId = itemId, QtyOnHand = 0m, AverageCost = 0m };
-            _db.InventoryBalances.Add(balance);
-        }
-
-        var recordedUnitCost = unitCost;
-        switch (type)
-        {
-            case StockMovementType.Receipt:
-            case StockMovementType.ProductionReceipt:
-            {
-                var newQty = balance.QtyOnHand + qty;
-                if (newQty > 0)
-                    balance.AverageCost = (balance.QtyOnHand * balance.AverageCost + qty * unitCost) / newQty;
-                balance.QtyOnHand = newQty;
-                break;
-            }
-            case StockMovementType.Issue:
-            case StockMovementType.ProductionIssue:
-            {
-                recordedUnitCost = balance.AverageCost; // keluaran memakai rata-rata saat ini
-                balance.QtyOnHand -= qty;               // rata-rata tetap
-                break;
-            }
-            case StockMovementType.Adjustment:
-            {
-                var newQty = balance.QtyOnHand + qty; // qty boleh negatif (delta)
-                if (qty > 0 && newQty > 0)
-                    balance.AverageCost = (balance.QtyOnHand * balance.AverageCost + qty * unitCost) / newQty;
-                else
-                    recordedUnitCost = balance.AverageCost;
-                balance.QtyOnHand = newQty;
-                break;
-            }
-        }
-
-        var movement = new StockMovement
-        {
-            ItemId = itemId,
-            Type = type,
-            Qty = qty,
-            UnitCost = recordedUnitCost,
-            MovementDate = date,
-            RefType = refType,
-            RefId = refId,
-            Notes = notes
-        };
-        _db.StockMovements.Add(movement);
-        return movement;
     }
 
     // -------------------------------------------------------- COGS + variance
