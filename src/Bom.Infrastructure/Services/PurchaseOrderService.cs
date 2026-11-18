@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Bom.Application.Dtos;
 using Bom.Application.Services;
 using Bom.Domain.Entities;
@@ -10,6 +11,8 @@ namespace Bom.Infrastructure.Services;
 /// <inheritdoc cref="IPurchaseOrderService"/>
 public class PurchaseOrderService : IPurchaseOrderService
 {
+    private const string OrderNoPrefix = "PO";
+
     private readonly BomDbContext _db;
     private readonly IInventoryLedgerService _ledger;
 
@@ -17,6 +20,30 @@ public class PurchaseOrderService : IPurchaseOrderService
     {
         _db = db;
         _ledger = ledger;
+    }
+
+    /// <summary>
+    /// Sama seperti saran kode Item (lihat ItemsController.GetNextCode): cuma nomor yang persis
+    /// cocok pola "PO-0000" yang dihitung; nomor lama/manual di luar pola diabaikan. Tidak dikunci
+    /// lintas-request - cuma saran awal, keunikan tetap divalidasi saat Create (409 bila tabrakan).
+    /// </summary>
+    public async Task<string> GetNextOrderNoAsync(CancellationToken ct = default)
+    {
+        var candidates = await _db.PurchaseOrders
+            .Where(o => o.OrderNo.StartsWith(OrderNoPrefix + "-"))
+            .Select(o => o.OrderNo)
+            .ToListAsync(ct);
+
+        var pattern = new Regex($"^{Regex.Escape(OrderNoPrefix)}-(\\d+)$");
+        var maxNumber = 0;
+        foreach (var no in candidates)
+        {
+            var match = pattern.Match(no);
+            if (match.Success && int.TryParse(match.Groups[1].Value, out var n) && n > maxNumber)
+                maxNumber = n;
+        }
+
+        return $"{OrderNoPrefix}-{(maxNumber + 1).ToString().PadLeft(4, '0')}";
     }
 
     // ---------------------------------------------------------------- Reads

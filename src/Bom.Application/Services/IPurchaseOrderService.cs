@@ -15,6 +15,9 @@ public interface IPurchaseOrderService
 
     Task<PurchaseOrderDto?> GetByIdAsync(int id, CancellationToken ct = default);
 
+    /// <summary>Saran nomor PO berikutnya (format "PO-0000") - hanya saran, tetap divalidasi unik saat Create.</summary>
+    Task<string> GetNextOrderNoAsync(CancellationToken ct = default);
+
     Task<PurchaseOrderDto> CreateAsync(UpsertPurchaseOrderDto dto, CancellationToken ct = default);
 
     /// <summary>Hanya boleh saat status Draft - seluruh baris diganti.</summary>

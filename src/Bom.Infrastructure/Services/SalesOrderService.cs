@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Bom.Application.Dtos;
 using Bom.Application.Services;
 using Bom.Domain.Entities;
@@ -11,6 +12,7 @@ namespace Bom.Infrastructure.Services;
 public class SalesOrderService : ISalesOrderService
 {
     private static readonly HashSet<ItemType> SellableTypes = [ItemType.SemiFinished, ItemType.FinishedGood];
+    private const string OrderNoPrefix = "INV";
 
     private readonly BomDbContext _db;
     private readonly IInventoryLedgerService _ledger;
@@ -19,6 +21,26 @@ public class SalesOrderService : ISalesOrderService
     {
         _db = db;
         _ledger = ledger;
+    }
+
+    /// <summary>Lihat PurchaseOrderService.GetNextOrderNoAsync - pola identik, prefix beda.</summary>
+    public async Task<string> GetNextOrderNoAsync(CancellationToken ct = default)
+    {
+        var candidates = await _db.SalesOrders
+            .Where(o => o.OrderNo.StartsWith(OrderNoPrefix + "-"))
+            .Select(o => o.OrderNo)
+            .ToListAsync(ct);
+
+        var pattern = new Regex($"^{Regex.Escape(OrderNoPrefix)}-(\\d+)$");
+        var maxNumber = 0;
+        foreach (var no in candidates)
+        {
+            var match = pattern.Match(no);
+            if (match.Success && int.TryParse(match.Groups[1].Value, out var n) && n > maxNumber)
+                maxNumber = n;
+        }
+
+        return $"{OrderNoPrefix}-{(maxNumber + 1).ToString().PadLeft(4, '0')}";
     }
 
     // ---------------------------------------------------------------- Reads

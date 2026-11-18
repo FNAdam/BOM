@@ -243,6 +243,22 @@ public class PurchaseOrderServiceTests
     }
 
     [Fact]
+    public async Task GetNextOrderNo_KosongDulu_LaluBertambah()
+    {
+        using var ctx = NewContext();
+        var service = NewService(ctx);
+
+        Assert.Equal("PO-0001", await service.GetNextOrderNoAsync());
+
+        await service.CreateAsync(NewPoDto() with { OrderNo = "PO-0001" });
+        Assert.Equal("PO-0002", await service.GetNextOrderNoAsync());
+
+        // Nomor manual di luar pola "PO-0000" diabaikan dari perhitungan.
+        await service.CreateAsync(NewPoDto() with { OrderNo = "PESANAN-KHUSUS" });
+        Assert.Equal("PO-0002", await service.GetNextOrderNoAsync());
+    }
+
+    [Fact]
     public async Task List_FilterByStatusDanSupplier_Bekerja()
     {
         using var ctx = NewContext();

@@ -58,3 +58,6 @@ public record ReceivePurchaseOrderDto(List<ReceivePurchaseOrderLineDto> Lines);
 
 /// <summary>Satu baris penerimaan: qty yang diterima SEKARANG (bukan akumulasi).</summary>
 public record ReceivePurchaseOrderLineDto(int LineId, decimal QtyReceiving);
+
+/// <summary>Saran nomor PO berikutnya (format "PO-0000") untuk mengisi form Create.</summary>
+public record NextPurchaseOrderNoDto(string OrderNo);

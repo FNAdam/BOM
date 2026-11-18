@@ -676,6 +676,10 @@ export interface ReceivePurchaseOrderDto {
   lines: ReceivePurchaseOrderLineDto[];
 }
 
+export interface NextPurchaseOrderNoDto {
+  orderNo: string;
+}
+
 // --- Sales Order & Struk (Fase 8b) ---
 export type SalesOrderStatus = 'Draft' | 'Completed' | 'Cancelled';
 export const SALES_ORDER_STATUSES: SalesOrderStatus[] = ['Draft', 'Completed', 'Cancelled'];
@@ -733,6 +737,10 @@ export interface UpsertSalesOrderDto {
   taxPercent: number;
   notes: string | null;
   lines: UpsertSalesOrderLineDto[];
+}
+
+export interface NextSalesOrderNoDto {
+  orderNo: string;
 }
 
 export interface SalesReceiptDto {

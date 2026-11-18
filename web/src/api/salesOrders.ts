@@ -1,5 +1,6 @@
 import { api } from './client';
 import type {
+  NextSalesOrderNoDto,
   SalesOrderDto,
   SalesOrderListDto,
   SalesOrderStatus,
@@ -23,6 +24,7 @@ export const salesOrdersApi = {
     return api.get<SalesOrderListDto[]>(qs ? `${BASE}?${qs}` : BASE);
   },
   get: (id: number) => api.get<SalesOrderDto>(`${BASE}/${id}`),
+  nextOrderNo: () => api.get<NextSalesOrderNoDto>(`${BASE}/next-no`),
   receipt: (id: number) => api.get<SalesReceiptDto>(`${BASE}/${id}/receipt`),
   create: (dto: UpsertSalesOrderDto) => api.post<SalesOrderDto>(BASE, dto),
   update: (id: number, dto: UpsertSalesOrderDto) => api.put<void>(`${BASE}/${id}`, dto),

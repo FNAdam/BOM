@@ -70,6 +70,7 @@ export function PurchaseOrdersPage() {
   const [editingQtyReceived, setEditingQtyReceived] = useState<number[]>([]);
   const [formError, setFormError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [generatingOrderNo, setGeneratingOrderNo] = useState(false);
 
   const [receiveFor, setReceiveFor] = useState<PurchaseOrderDto | null>(null);
   const [receiveQty, setReceiveQty] = useState<Record<number, string>>({});
@@ -113,9 +114,22 @@ export function PurchaseOrdersPage() {
     setFormError(null);
   }
 
+  async function suggestOrderNo() {
+    setGeneratingOrderNo(true);
+    try {
+      const { orderNo: suggested } = await purchaseOrdersApi.nextOrderNo();
+      setOrderNo(suggested);
+    } catch {
+      // diamkan - user tetap bisa mengisi nomor manual
+    } finally {
+      setGeneratingOrderNo(false);
+    }
+  }
+
   function openCreate() {
     resetForm();
     setShowForm(true);
+    void suggestOrderNo();
   }
 
   async function openEdit(row: PurchaseOrderListDto) {
@@ -369,8 +383,16 @@ export function PurchaseOrdersPage() {
 
                 <label>
                   No. PO
-                  <input value={orderNo} maxLength={40} required placeholder="mis. PO-2026-11-001"
-                    onChange={(e) => setOrderNo(e.target.value)} />
+                  <div className="input-with-action">
+                    <input value={orderNo} maxLength={40} required placeholder="mis. PO-0001"
+                      onChange={(e) => setOrderNo(e.target.value)} />
+                    {editingId === null && (
+                      <button type="button" className="btn btn-sm" disabled={generatingOrderNo}
+                        onClick={() => void suggestOrderNo()} title="Buat ulang nomor otomatis">
+                        {generatingOrderNo ? '...' : 'Auto'}
+                      </button>
+                    )}
+                  </div>
                 </label>
 
                 <label>

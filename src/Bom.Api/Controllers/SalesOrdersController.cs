@@ -35,6 +35,10 @@ public class SalesOrdersController : ControllerBase
         return order is null ? NotFound() : Ok(order);
     }
 
+    [HttpGet("next-no")]
+    public async Task<ActionResult<NextSalesOrderNoDto>> GetNextOrderNo()
+        => Ok(new NextSalesOrderNoDto(await _service.GetNextOrderNoAsync()));
+
     [HttpGet("{id:int}/receipt")]
     public async Task<ActionResult<SalesReceiptDto>> GetReceipt(int id)
     {

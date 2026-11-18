@@ -57,6 +57,9 @@ public record UpsertSalesOrderLineDto(
     decimal Qty,
     decimal UnitPrice);
 
+/// <summary>Saran nomor pesanan/struk berikutnya (format "INV-0000") untuk mengisi form Create.</summary>
+public record NextSalesOrderNoDto(string OrderNo);
+
 /// <summary>Data siap cetak struk - hanya tersedia untuk pesanan berstatus Completed.</summary>
 public record SalesReceiptDto(
     int Id,

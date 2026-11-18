@@ -35,6 +35,10 @@ public class PurchaseOrdersController : ControllerBase
         return order is null ? NotFound() : Ok(order);
     }
 
+    [HttpGet("next-no")]
+    public async Task<ActionResult<NextPurchaseOrderNoDto>> GetNextOrderNo()
+        => Ok(new NextPurchaseOrderNoDto(await _service.GetNextOrderNoAsync()));
+
     [HttpPost]
     public async Task<ActionResult<PurchaseOrderDto>> Create(UpsertPurchaseOrderDto dto)
     {

@@ -70,6 +70,7 @@ export function SalesOrdersPage() {
   const [lines, setLines] = useState<UpsertSalesOrderLineDto[]>([emptyLine()]);
   const [formError, setFormError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [generatingOrderNo, setGeneratingOrderNo] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -120,9 +121,22 @@ export function SalesOrdersPage() {
     setFormError(null);
   }
 
+  async function suggestOrderNo() {
+    setGeneratingOrderNo(true);
+    try {
+      const { orderNo: suggested } = await salesOrdersApi.nextOrderNo();
+      setOrderNo(suggested);
+    } catch {
+      // diamkan - user tetap bisa mengisi nomor manual
+    } finally {
+      setGeneratingOrderNo(false);
+    }
+  }
+
   function openCreate() {
     resetForm();
     setShowForm(true);
+    void suggestOrderNo();
   }
 
   async function openEdit(row: SalesOrderListDto) {
@@ -322,8 +336,16 @@ export function SalesOrdersPage() {
               <div className="form-grid">
                 <label>
                   No. Pesanan / Struk
-                  <input value={orderNo} maxLength={40} required placeholder="mis. INV-2026-11-001"
-                    onChange={(e) => setOrderNo(e.target.value)} />
+                  <div className="input-with-action">
+                    <input value={orderNo} maxLength={40} required placeholder="mis. INV-0001"
+                      onChange={(e) => setOrderNo(e.target.value)} />
+                    {editingId === null && (
+                      <button type="button" className="btn btn-sm" disabled={generatingOrderNo}
+                        onClick={() => void suggestOrderNo()} title="Buat ulang nomor otomatis">
+                        {generatingOrderNo ? '...' : 'Auto'}
+                      </button>
+                    )}
+                  </div>
                 </label>
 
                 <label>

@@ -149,6 +149,18 @@ public class SalesOrderServiceTests
     }
 
     [Fact]
+    public async Task GetNextOrderNo_KosongDulu_LaluBertambah()
+    {
+        using var ctx = NewContext();
+        var service = NewService(ctx);
+
+        Assert.Equal("INV-0001", await service.GetNextOrderNoAsync());
+
+        await service.CreateAsync(NewSoDto() with { OrderNo = "INV-0001" });
+        Assert.Equal("INV-0002", await service.GetNextOrderNoAsync());
+    }
+
+    [Fact]
     public async Task Cancel_DariDraft_Berhasil()
     {
         using var ctx = NewContext();
